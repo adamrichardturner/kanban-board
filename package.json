@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:docker": "docker-compose up -d",
+    "dev:full": "npm run dev:docker && npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
