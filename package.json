@@ -6,13 +6,22 @@
     "dev": "next dev --turbopack",
     "dev:docker": "docker-compose up -d",
     "dev:full": "npm run dev:docker && npm run dev",
+    "db:migrate": "npx prisma migrate dev && ./scripts/apply-after-init.sh",
+    "db:reset": "npx prisma migrate reset --force && ./scripts/apply-after-init.sh",
+    "db:generate": "npx prisma generate",
+    "db:seed": "npx prisma db seed",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit"
   },
+  "prisma": {
+    "schema": "database/schema.prisma"
+  },
   "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "bcryptjs": "^3.0.2",
     "next": "15.4.4",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -29,6 +38,7 @@
     "eslint-plugin-prettier": "^5.5.3",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
+    "prisma": "^6.12.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
