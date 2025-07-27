@@ -11,26 +11,31 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 -- Triggers for auto-updating updated_at
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_boards_updated_at ON boards;
 CREATE TRIGGER update_boards_updated_at
 BEFORE UPDATE ON boards
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_columns_updated_at ON columns;
 CREATE TRIGGER update_columns_updated_at
 BEFORE UPDATE ON columns
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
 CREATE TRIGGER update_tasks_updated_at
 BEFORE UPDATE ON tasks
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_subtasks_updated_at ON subtasks;
 CREATE TRIGGER update_subtasks_updated_at
 BEFORE UPDATE ON subtasks
 FOR EACH ROW
@@ -175,6 +180,9 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+-- Note: RLS policies commented out for development
+-- Uncomment when implementing proper authentication context
+/*
 -- Enable RLS (Row-Level Security)
 ALTER TABLE boards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE columns ENABLE ROW LEVEL SECURITY;
@@ -198,3 +206,4 @@ FOR ALL
 USING (board_id IN (
   SELECT id FROM boards WHERE user_id = current_setting('app.current_user_id')::UUID
 ));
+*/

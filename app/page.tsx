@@ -1,102 +1,146 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className='grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-sans sm:p-20'>
-      <main className='row-start-2 flex flex-col items-center gap-[32px] sm:items-start'>
-        <Image
-          className='dark:invert'
-          src='/next.svg'
-          alt='Next.js logo'
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className='list-inside list-decimal text-center font-mono text-sm/6 sm:text-left'>
-          <li className='mb-2 tracking-[-.01em]'>
-            Get started by editing{' '}
-            <code className='rounded bg-black/[.05] px-1 py-0.5 font-mono font-semibold dark:bg-white/[.06]'>
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className='tracking-[-.01em]'>
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className='flex flex-col items-center gap-4 sm:flex-row'>
-          <a
-            className='bg-foreground text-background flex h-10 items-center justify-center gap-2 rounded-full border border-solid border-transparent px-4 text-sm font-medium transition-colors hover:bg-[#383838] sm:h-12 sm:w-auto sm:px-5 sm:text-base dark:hover:bg-[#ccc]'
-            href='https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      console.log('RESULT:  ', result);
+
+      if (response.ok) {
+        // Store the token (adjust this based on your auth implementation)
+        localStorage.setItem('token', result.data.token);
+        // Redirect to dashboard or boards page
+        router.push('/dashboard'); // or wherever your boards are displayed
+      } else {
+        console.error('Demo login failed:', result.error);
+        alert('Demo login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Demo login error:', error);
+      alert('Demo login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className='grid min-h-screen items-center justify-items-center bg-gradient-to-br from-slate-50 to-slate-100 font-sans dark:from-slate-900 dark:to-slate-800'>
+      <main className='mx-auto flex max-w-2xl flex-col items-center justify-center gap-8 px-6 text-center'>
+        {/* Logo */}
+        <div className='mb-4'>
+          <Image
+            className='dark:invert'
+            src='/logo/kanban-board-logo.svg'
+            alt='Kanban Board Logo'
+            width={200}
+            height={33}
+            priority
+          />
+        </div>
+
+        {/* Hero Content */}
+        <div className='space-y-6'>
+          <h1 className='text-4xl leading-tight font-bold text-slate-900 md:text-5xl dark:text-slate-100'>
+            Streamline Your Workflow
+          </h1>
+
+          <p className='max-w-xl text-lg leading-relaxed text-slate-600 md:text-xl dark:text-slate-300'>
+            Try out this feature-rich Kanban board designed for effortless task
+            organisation and team collaboration. Explore the demo account with
+            sample boards and tasks.
+          </p>
+        </div>
+
+        {/* CTA Buttons */}
+        <div className='mt-8 flex flex-col gap-4 sm:flex-row'>
+          <Button
+            onClick={handleDemoLogin}
+            disabled={isLoading}
+            className='transform bg-blue-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
           >
-            <Image
-              className='dark:invert'
-              src='/vercel.svg'
-              alt='Vercel logomark'
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className='flex h-10 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:w-auto sm:px-5 sm:text-base md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]'
-            href='https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
+            {isLoading ? (
+              <div className='flex items-center gap-2'>
+                <div className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent'></div>
+                Loading Demo...
+              </div>
+            ) : (
+              <div className='flex items-center gap-2'>
+                <Play size={20} />
+                Try Demo Account
+              </div>
+            )}
+          </Button>
+
+          <Button
+            variant='outline'
+            asChild
+            className='border-slate-300 px-8 py-3 text-lg font-medium transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:hover:border-slate-500 dark:hover:bg-slate-800'
           >
-            Read our docs
-          </a>
+            <Link href='/register'>Get Started Free</Link>
+          </Button>
+        </div>
+
+        {/* Features Preview */}
+        <div className='mt-12 grid grid-cols-1 gap-6 text-sm md:grid-cols-3'>
+          <div className='rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800'>
+            <div className='mb-2 font-semibold text-slate-900 dark:text-slate-100'>
+              Multiple Boards
+            </div>
+            <div className='text-slate-600 dark:text-slate-300'>
+              Organize different projects with dedicated boards
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800'>
+            <div className='mb-2 font-semibold text-slate-900 dark:text-slate-100'>
+              Drag & Drop
+            </div>
+            <div className='text-slate-600 dark:text-slate-300'>
+              Effortlessly move tasks between columns
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800'>
+            <div className='mb-2 font-semibold text-slate-900 dark:text-slate-100'>
+              Subtasks
+            </div>
+            <div className='text-slate-600 dark:text-slate-300'>
+              Break down complex tasks into smaller steps
+            </div>
+          </div>
         </div>
       </main>
-      <footer className='row-start-3 flex flex-wrap items-center justify-center gap-[24px]'>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
+
+      {/* Footer */}
+      <footer className='row-start-3 flex flex-wrap items-center justify-center gap-6 py-8'>
+        <Link
+          href='https://adamrichardturner.dev'
           target='_blank'
           rel='noopener noreferrer'
+          className='flex items-center gap-2 text-sm text-slate-500 transition-colors duration-200 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
         >
-          <Image
-            aria-hidden
-            src='/file.svg'
-            alt='File icon'
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <Image
-            aria-hidden
-            src='/window.svg'
-            alt='Window icon'
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <Image
-            aria-hidden
-            src='/globe.svg'
-            alt='Globe icon'
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          Made by Adam Turner
+          <ExternalLink size={14} />
+        </Link>
       </footer>
     </div>
   );

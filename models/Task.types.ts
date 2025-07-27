@@ -30,8 +30,9 @@ export interface ColumnWithCount extends Column {
 // Input types for creating/updating
 export interface CreateTaskInput {
   title: string;
-  description?: string;
+  boardId: string;
   columnId: string;
+  description?: string;
   priority?: number;
   dueDate?: Date | string;
   subtasks?: CreateSubtaskInput[];

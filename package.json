@@ -4,29 +4,48 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "db:migrate": "npx prisma migrate dev && ./scripts/apply-after-init.sh",
-    "db:reset": "npx prisma migrate reset --force && ./scripts/apply-after-init.sh",
-    "db:generate": "npx prisma generate",
-    "db:seed": "ts-node prisma/seed.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f postgres",
+    "docker:clean": "docker-compose down -v --remove-orphans",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev",
+    "db:migrate:deploy": "npx prisma migrate deploy",
+    "db:reset": "npx prisma migrate reset --force",
+    "db:seed": "npx tsx database/seed.ts",
+    "db:studio": "npx prisma studio",
+    "db:setup": "npm run docker:up && npm run db:wait && npm run db:migrate && npm run db:functions && npm run db:seed",
+    "db:wait": "sleep 5",
+    "db:functions": "npm run db:apply-sql-functions",
+    "db:apply-sql-functions": "docker cp database/functions.sql kanban_postgres:/tmp/functions.sql && docker exec kanban_postgres psql -U kanban_db -d kanban_board_prod -f /tmp/functions.sql",
+    "db:apply-sql-functions-alt": "node scripts/apply-functions.js",
+    "dev:full": "npm run db:setup && npm run dev"
   },
   "prisma": {
-    "schema": "database/schema.prisma"
+    "schema": "database/schema.prisma",
+    "seed": "npx tsx database/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "@radix-ui/react-slot": "^1.2.3",
     "bcryptjs": "^3.0.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.526.0",
     "next": "15.4.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -34,11 +53,13 @@
     "eslint-config-next": "15.4.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
+    "jsonwebtoken": "^9.0.2",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "prisma": "^6.12.0",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "zod": "^4.0.10"
   }
 }
