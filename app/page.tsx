@@ -1,46 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 
 export default function Home() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleDemoLogin = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/auth/demo-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = await response.json();
-
-      console.log('RESULT:  ', result);
-
-      if (response.ok) {
-        // Store the token (adjust this based on your auth implementation)
-        localStorage.setItem('token', result.data.token);
-        // Redirect to dashboard or boards page
-        router.push('/dashboard'); // or wherever your boards are displayed
-      } else {
-        console.error('Demo login failed:', result.error);
-        alert('Demo login failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Demo login error:', error);
-      alert('Demo login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { isLoading, handleDemoLogin } = useAuth();
 
   return (
     <div className='grid min-h-screen items-center justify-items-center bg-gradient-to-br from-slate-50 to-slate-100 font-sans dark:from-slate-900 dark:to-slate-800'>
@@ -49,7 +17,7 @@ export default function Home() {
         <div className='mb-4'>
           <Image
             className='dark:invert'
-            src='/logo/kanban-board-logo.svg'
+            src={KanBanLogo}
             alt='Kanban Board Logo'
             width={200}
             height={33}
