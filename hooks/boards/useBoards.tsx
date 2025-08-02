@@ -11,7 +11,7 @@ import { useSelectedBoard } from './useSelectedBoard';
 export function useBoards() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { setSelectedBoard } = useSelectedBoard();
+  const { setSelectedBoard, selectedBoardId } = useSelectedBoard(); // Make sure selectedBoardId is available
 
   const getUserBoards = async (): Promise<BoardResponse[]> => {
     const res = await fetch('/api/boards');
@@ -119,46 +119,98 @@ export function useBoards() {
     },
   });
 
-  const deleteBoardMutation = useMutation<void, Error, string>({
+  const deleteBoardMutation = useMutation<
+    void,
+    Error,
+    string,
+    { previousBoards: BoardResponse[] | undefined }
+  >({
     mutationFn: async (boardId: string) => {
       const res = await fetch(`/api/boards/${boardId}`, {
         method: 'DELETE',
       });
 
       if (!res.ok) {
-        throw new Error('Failed to delete board');
-      }
-    },
-    onSuccess: (_, boardId) => {
-      queryClient.setQueryData<BoardResponse[]>(['boards'], (old) => {
-        return old ? old.filter((board) => board.id !== boardId) : [];
-      });
-
-      queryClient.removeQueries({ queryKey: ['boards', boardId] });
-
-      // Clear selection if deleted board was selected
-      const currentSelection = queryClient.getQueryData<string>([
-        'selectedBoard',
-      ]);
-      if (currentSelection === boardId) {
-        // Select the first available board or clear selection
-        const boards = queryClient.getQueryData<BoardResponse[]>(['boards']);
-        const remainingBoards = boards?.filter((board) => board.id !== boardId);
-
-        if (remainingBoards && remainingBoards.length > 0) {
-          const firstBoard = remainingBoards.sort(
-            (a, b) => a.position - b.position,
-          )[0];
-          setSelectedBoard(firstBoard.id);
-          router.push(`/boards/${firstBoard.id}`);
-        } else {
-          setSelectedBoard(null);
-          router.push('/boards');
+        // Treat 404 as success since the board is already gone
+        if (res.status === 404) {
+          console.log('Board already deleted (404), treating as success');
+          return;
         }
+
+        const errorText = await res.text();
+        throw new Error(`Failed to delete board: ${res.status} ${errorText}`);
       }
     },
-    onError: (error) => {
+    onMutate: async (deletedBoardId) => {
+      // Cancel any outgoing refetches to prevent optimistic updates from being overwritten
+      await queryClient.cancelQueries({ queryKey: ['boards'] });
+
+      // Snapshot the previous value
+      const previousBoards = queryClient.getQueryData<BoardResponse[]>([
+        'boards',
+      ]);
+
+      // Optimistically update to remove the board
+      if (previousBoards) {
+        const filteredBoards = previousBoards.filter(
+          (board) => board.id !== deletedBoardId,
+        );
+        queryClient.setQueryData<BoardResponse[]>(['boards'], filteredBoards);
+      }
+
+      // Remove the specific board query immediately
+      queryClient.removeQueries({ queryKey: ['boards', deletedBoardId] });
+
+      return { previousBoards };
+    },
+    onSuccess: (_, deletedBoardId) => {
+      try {
+        // Handle navigation if the deleted board was currently selected
+        const currentSelectedBoardId = selectedBoardId;
+
+        if (currentSelectedBoardId === deletedBoardId) {
+          // Get the updated boards list (should already be filtered from optimistic update)
+          const remainingBoards =
+            queryClient.getQueryData<BoardResponse[]>(['boards']) || [];
+
+          if (remainingBoards.length > 0) {
+            // Sort remaining boards by position and select the first one
+            const sortedBoards = [...remainingBoards].sort(
+              (a, b) => a.position - b.position,
+            );
+            const firstBoard = sortedBoards[0];
+
+            console.log('Navigating to first available board:', firstBoard.id);
+            setSelectedBoard(firstBoard.id);
+            router.push(`/boards/${firstBoard.id}`);
+          } else {
+            // No boards left, navigate to boards index
+            console.log('No boards remaining, navigating to /boards');
+            setSelectedBoard(null);
+            router.push('/boards');
+          }
+        }
+
+        console.log('Board deleted successfully');
+      } catch (error) {
+        console.error('Error in delete navigation:', error);
+        // Fallback navigation
+        setSelectedBoard(null);
+        router.push('/boards');
+      }
+    },
+    onError: (error, deletedBoardId, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousBoards) {
+        queryClient.setQueryData(['boards'], context.previousBoards);
+      }
+
       console.error('Delete board failed:', error);
+      // You might want to show a toast notification here
+    },
+    onSettled: () => {
+      // Ensure we have fresh data after the mutation
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
     },
   });
 

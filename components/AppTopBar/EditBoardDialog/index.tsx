@@ -243,9 +243,9 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                     Delete this board?
                   </AlertDialogTitle>
                   <AlertDialogDescription className='text-gray-600'>
-                    Are you sure you want to delete the '{board.name}' board?
-                    This action will remove all columns and tasks and cannot be
-                    reversed.
+                    Are you sure you want to delete the &apos;{board.name}&apos;
+                    board? This action will remove all columns and tasks and
+                    cannot be reversed.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className='flex flex-col-reverse gap-2 sm:flex-row'>
