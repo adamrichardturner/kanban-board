@@ -47,6 +47,17 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   // Initialize form data when dialog opens or board changes
   useEffect(() => {
     if (open && board) {
+      console.log('EditBoardDialog: Updating form data with board:', board.id);
+      console.log('EditBoardDialog: Column count:', board.columns?.length);
+      console.log(
+        'EditBoardDialog: Column names:',
+        board.columns?.map((c) => c.name).join(', ') || 'none',
+      );
+      console.log(
+        'EditBoardDialog: Column IDs:',
+        board.columns?.map((c) => c.id).join(', ') || 'none',
+      );
+
       setBoardName(board.name);
       const sortedColumns = [...(board.columns || [])].sort(
         (a, b) => a.position - b.position,

@@ -13,8 +13,8 @@ export function useSelectedBoard() {
       }
       return null;
     },
-    staleTime: Infinity,
-    gcTime: Infinity,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const selectedBoardData = useQuery<BoardWithColumns | null>({
@@ -23,17 +23,20 @@ export function useSelectedBoard() {
       const boardId = selectedBoardQuery.data;
       if (!boardId) return null;
 
-      const cachedBoard = queryClient.getQueryData<BoardWithColumns>([
-        'boards',
-        boardId,
-      ]);
-      if (cachedBoard) return cachedBoard;
-
+      // Always fetch fresh data from API - no cache lookup
+      // This ensures EditBoardDialog always gets current column data
       try {
+        console.log('Fetching fresh board data for:', boardId);
         const res = await fetch(`/api/boards/${boardId}`);
         if (!res.ok) return null;
 
         const data = await res.json();
+        console.log(
+          'Fresh board data received:',
+          data.data?.name,
+          'columns:',
+          data.data?.columns?.length,
+        );
         return data.data;
       } catch (error) {
         console.error('Failed to fetch selected board:', error);
@@ -41,7 +44,9 @@ export function useSelectedBoard() {
       }
     },
     enabled: !!selectedBoardQuery.data,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0, // Always refetch when invalidated - ensures fresh column data
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   // Ensure selectedBoardId is always a string
@@ -97,6 +102,18 @@ export function useSelectedBoard() {
     setSelectedBoard(null);
   };
 
+  const refetchSelectedBoard = () => {
+    // Force refetch of selected board data
+    return selectedBoardData.refetch();
+  };
+
+  const invalidateSelectedBoard = () => {
+    // Invalidate all selectedBoardData queries to ensure fresh data
+    queryClient.invalidateQueries({
+      queryKey: ['selectedBoardData'],
+    });
+  };
+
   return {
     selectedBoardId, // ← Now always returns a string (empty string if none selected)
     selectedBoard: selectedBoardData.data,
@@ -105,5 +122,7 @@ export function useSelectedBoard() {
       selectedBoardQuery.isLoading || selectedBoardData.isLoading,
     setSelectedBoard,
     clearSelectedBoard,
+    refetchSelectedBoard,
+    invalidateSelectedBoard,
   };
 }

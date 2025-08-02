@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import LoadingSpinner from '@/public/spinner.svg';
+import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 
 export function AppSidebar() {
   const { boards, isLoading } = useBoards();
@@ -83,20 +84,24 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 ))}
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:text-[#635FC7] focus:text-[#635FC7] active:bg-[#635FC7] active:text-white'
-                  >
-                    <div className='flex w-full items-center gap-4'>
-                      <Image
-                        src='/boards/board-icon-create.svg'
-                        alt='Board Icon'
-                        width={16}
-                        height={16}
-                      />
-                      <span className='truncate'>+ Create New Board</span>
-                    </div>
-                  </SidebarMenuButton>
+                  <CreateNewBoardDialog
+                    trigger={
+                      <SidebarMenuButton
+                        asChild
+                        className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:text-[#635FC7] focus:text-[#635FC7] active:bg-[#635FC7] active:text-white'
+                      >
+                        <div className='flex w-full items-center gap-4'>
+                          <Image
+                            src='/boards/board-icon-create.svg'
+                            alt='Board Icon'
+                            width={16}
+                            height={16}
+                          />
+                          <span className='truncate'>+ Create New Board</span>
+                        </div>
+                      </SidebarMenuButton>
+                    }
+                  />
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

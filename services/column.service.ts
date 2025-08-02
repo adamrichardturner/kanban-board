@@ -48,7 +48,7 @@ export class ColumnService {
       throw new Error('Board not found');
     }
 
-    const column = await this.columnRepository.create(
+    const column = await this.columnRepository.createWithAutoPosition(
       boardId,
       data.name,
       data.color,

@@ -3,15 +3,75 @@ import { useRouter } from 'next/navigation';
 import { BoardResponse, BoardWithColumns, ApiResponse } from '@/types';
 import {
   CreateBoardRequest,
+  CreateColumnRequest,
   ReorderRequest,
   UpdateBoardRequest,
 } from '@/types/kanban';
 import { useSelectedBoard } from './useSelectedBoard';
 
+export interface CreateBoardWithColumnsRequest {
+  name: string;
+  isDefault?: boolean;
+  columns?: string[];
+}
+
 export function useBoards() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { setSelectedBoard, selectedBoardId } = useSelectedBoard(); // Make sure selectedBoardId is available
+  const {
+    setSelectedBoard,
+    selectedBoardId,
+    invalidateSelectedBoard,
+    refetchSelectedBoard,
+  } = useSelectedBoard();
+
+  const createColumnsForBoard = async (
+    boardId: string,
+    columnNames: string[],
+  ) => {
+    console.log(
+      'Creating columns sequentially for board:',
+      boardId,
+      'columns:',
+      columnNames,
+    );
+
+    // Create columns sequentially to avoid race condition with position calculation
+    for (let i = 0; i < columnNames.length; i++) {
+      const name = columnNames[i];
+      console.log(`Creating column ${i + 1}/${columnNames.length}: "${name}"`);
+
+      const columnData: CreateColumnRequest = {
+        name,
+      };
+
+      const response = await fetch(`/api/columns?boardId=${boardId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(columnData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Column creation failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          columnName: name,
+          boardId,
+          columnIndex: i,
+        });
+        throw new Error(
+          `Failed to create column "${name}": ${response.status} ${errorText}`,
+        );
+      }
+
+      const result = await response.json();
+      console.log(`Successfully created column "${name}":`, result);
+    }
+
+    console.log('All columns created successfully for board:', boardId);
+  };
 
   const getUserBoards = async (): Promise<BoardResponse[]> => {
     const res = await fetch('/api/boards');
@@ -49,13 +109,20 @@ export function useBoards() {
   const createBoardMutation = useMutation<
     BoardResponse,
     Error,
-    CreateBoardRequest
+    CreateBoardWithColumnsRequest
   >({
-    mutationFn: async (data: CreateBoardRequest) => {
+    mutationFn: async (data: CreateBoardWithColumnsRequest) => {
+      // Create the board first (without columns in the API request)
+      const { columns, ...boardData } = data;
+      const boardPayload: CreateBoardRequest = {
+        name: boardData.name,
+        isDefault: boardData.isDefault,
+      };
+
       const res = await fetch('/api/boards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(boardPayload),
       });
 
       if (!res.ok) {
@@ -63,12 +130,26 @@ export function useBoards() {
       }
 
       const response: ApiResponse<BoardResponse> = await res.json();
-      return response.data!;
+      const newBoard = response.data!;
+
+      // Create columns if provided
+      if (columns && columns.length > 0) {
+        const filteredColumns = columns.filter((column) => column.trim());
+        if (filteredColumns.length > 0) {
+          await createColumnsForBoard(newBoard.id, filteredColumns);
+        }
+      }
+
+      return newBoard;
     },
     onSuccess: (newBoard) => {
       queryClient.setQueryData<BoardResponse[]>(['boards'], (old) => {
         return old ? [...old, newBoard] : [newBoard];
       });
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+      queryClient.invalidateQueries({ queryKey: ['boards', newBoard.id] });
 
       // Set as selected board and navigate
       setSelectedBoard(newBoard.id);
@@ -107,11 +188,18 @@ export function useBoards() {
           : [updatedBoard];
       });
 
-      queryClient.setQueryData(
-        ['boards', updatedBoard.id],
-        (old: BoardWithColumns | undefined) => {
-          return old ? { ...old, ...updatedBoard } : undefined;
-        },
+      // Invalidate the detailed board cache to force refetch with updated columns
+      queryClient.invalidateQueries({
+        queryKey: ['boards', updatedBoard.id],
+      });
+
+      // Force immediate refetch of selected board data to ensure fresh columns
+      invalidateSelectedBoard();
+      refetchSelectedBoard();
+
+      console.log(
+        'Board update successful, invalidated and refetched caches for board:',
+        updatedBoard.id,
       );
     },
     onError: (error) => {
@@ -190,7 +278,6 @@ export function useBoards() {
 
             // Invalidate the post-login route query to prevent AuthRedirect from interfering
             queryClient.invalidateQueries({ queryKey: ['postLoginRoute'] });
-
             router.push('/boards');
           }
         }
@@ -203,6 +290,9 @@ export function useBoards() {
 
         // Invalidate the post-login route query to prevent AuthRedirect from interfering
         queryClient.invalidateQueries({ queryKey: ['postLoginRoute'] });
+
+        // Invalidate selected board data since no boards remain
+        invalidateSelectedBoard();
 
         router.push('/boards');
       }
@@ -305,7 +395,8 @@ export function useBoards() {
 
     useBoardQuery,
 
-    createBoard: (data: CreateBoardRequest) => createBoardMutation.mutate(data),
+    createBoard: (data: CreateBoardWithColumnsRequest) =>
+      createBoardMutation.mutate(data),
     updateBoard: (boardId: string, data: UpdateBoardRequest) =>
       updateBoardMutation.mutate({ boardId, data }),
     deleteBoard: (boardId: string) => deleteBoardMutation.mutate(boardId),
