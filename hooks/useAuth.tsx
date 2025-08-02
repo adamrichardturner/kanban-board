@@ -5,8 +5,7 @@ import { AuthUser, AuthResponse, ApiResponse } from '@/types';
 async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch('/api/auth/me');
   if (!res.ok) {
-    const err: ApiResponse = await res.json();
-    throw new Error(err.error || 'Failed to fetch user');
+    throw new Error('Failed to fetch user');
   }
   const data: ApiResponse<AuthUser> = await res.json();
   return data.data!;
@@ -32,12 +31,13 @@ export function useAuth() {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      const payload: ApiResponse<AuthResponse> = await res.json();
+      console.log('RES IS: ', res);
 
       if (!res.ok) {
-        throw new Error(payload.error || 'Demo login failed');
+        throw new Error('Demo login failed');
       }
 
+      const payload: ApiResponse<AuthResponse> = await res.json();
       return payload.data!;
     },
     onSuccess: ({ user }) => {
@@ -58,8 +58,7 @@ export function useAuth() {
       });
 
       if (!res.ok) {
-        const payload: ApiResponse = await res.json();
-        throw new Error(payload.error || 'Logout failed');
+        throw new Error('Logout failed');
       }
     },
     onSuccess: () => {
@@ -95,7 +94,7 @@ export function useAuth() {
       null,
 
     // Actions
-    demoLogin: () => loginMutation.mutate(),
+    handleDemoLogin: () => loginMutation.mutate(),
     logout: () => logoutMutation.mutate(),
 
     // Mutation states

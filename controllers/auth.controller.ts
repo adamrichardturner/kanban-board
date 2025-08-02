@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { AuthService } from '@/services/auth.service';
 import { ApiResponse, AuthResponse, AuthUser, HTTP_STATUS } from '@/types';
@@ -44,7 +44,7 @@ export class AuthController {
     }
   }
 
-  async getCurrentUser(request: NextRequest): Promise<NextResponse> {
+  async getCurrentUser(): Promise<NextResponse> {
     try {
       const cookieStore = await cookies();
       const token = cookieStore.get('token')?.value;
@@ -81,7 +81,7 @@ export class AuthController {
     }
   }
 
-  async logout(request: NextRequest): Promise<NextResponse> {
+  async logout(): Promise<NextResponse> {
     try {
       const cookieStore = await cookies();
       const token = cookieStore.get('token')?.value;

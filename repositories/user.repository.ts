@@ -4,9 +4,9 @@ import { User } from '@/types';
 export class UserRepository {
   async findDemoUser(): Promise<User | null> {
     const sql = `
-      SELECT id, email, username, full_name, is_active, is_demo, created_at
+      SELECT id, email, username, full_name, is_demo, created_at
       FROM users 
-      WHERE is_demo = true AND is_active = true
+      WHERE is_demo = true
       LIMIT 1
     `;
     return queryOne<User>(sql);
@@ -14,9 +14,9 @@ export class UserRepository {
 
   async findUserById(userId: string): Promise<User | null> {
     const sql = `
-      SELECT id, email, username, full_name, is_active, is_demo, created_at
+      SELECT id, email, username, full_name, is_demo, created_at
       FROM users 
-      WHERE id = $1 AND is_active = true
+      WHERE id = $1
     `;
     return queryOne<User>(sql, [userId]);
   }

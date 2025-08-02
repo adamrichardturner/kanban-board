@@ -1,19 +1,6 @@
 import { UserRepository } from '@/repositories/user.repository';
 import { signToken, verifyToken } from '@/lib/auth';
-
-interface UserResponse {
-  id: string;
-  email: string;
-  username: string;
-  fullName: string | null;
-  isDemo: boolean;
-  createdAt: Date;
-}
-
-interface AuthResponse {
-  user: UserResponse;
-  token: string;
-}
+import { AuthResponse, UserResponse } from '@/types';
 
 export class AuthService {
   private userRepository: UserRepository;
@@ -44,6 +31,7 @@ export class AuthService {
       fullName: user.full_name,
       isDemo: user.is_demo,
       createdAt: user.created_at,
+      updatedAt: user.updated_at,
     };
 
     const refreshTokenExpiry = new Date();
@@ -80,6 +68,7 @@ export class AuthService {
       fullName: user.full_name,
       isDemo: user.is_demo,
       createdAt: user.created_at,
+      updatedAt: user.updated_at,
     };
   }
 
