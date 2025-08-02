@@ -21,6 +21,7 @@ import { X, Plus } from 'lucide-react';
 import { CreateTaskRequest } from '@/types/kanban';
 import { useTasks } from '@/hooks/tasks/useTasks';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
+import Image from 'next/image';
 
 interface CreateTaskDialogProps {
   defaultColumnId?: string;
@@ -233,9 +234,21 @@ export function CreateTaskDialog({
           }
           className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
         >
-          {isCreatingTask || isCreatingTaskWithSubtasks
-            ? 'Creating...'
-            : 'Create Task'}
+          {isCreatingTask || isCreatingTaskWithSubtasks ? (
+            <div className='flex items-center gap-2'>
+              <Image
+                src='/spinner.svg'
+                alt='Creating...'
+                width={16}
+                height={16}
+                priority
+                className='brightness-0 invert'
+              />
+              Creating...
+            </div>
+          ) : (
+            'Create Task'
+          )}
         </Button>
       </DialogContent>
     </Dialog>

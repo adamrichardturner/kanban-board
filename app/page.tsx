@@ -47,7 +47,14 @@ export default function Home() {
           >
             {isLoading ? (
               <div className='flex items-center gap-2'>
-                <div className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent'></div>
+                <Image
+                  src='/spinner.svg'
+                  alt='Loading...'
+                  width={16}
+                  height={16}
+                  priority
+                  className='brightness-0 invert'
+                />
                 Loading Demo...
               </div>
             ) : (

@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { X, Plus, EllipsisVertical, Trash2 } from 'lucide-react';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { BoardWithColumns } from '@/types';
+import Image from 'next/image';
 
 interface EditBoardDialogProps {
   board?: BoardWithColumns | null; // Made optional and nullable
@@ -47,17 +48,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   // Initialize form data when dialog opens or board changes
   useEffect(() => {
     if (open && board) {
-      console.log('EditBoardDialog: Updating form data with board:', board.id);
-      console.log('EditBoardDialog: Column count:', board.columns?.length);
-      console.log(
-        'EditBoardDialog: Column names:',
-        board.columns?.map((c) => c.name).join(', ') || 'none',
-      );
-      console.log(
-        'EditBoardDialog: Column IDs:',
-        board.columns?.map((c) => c.id).join(', ') || 'none',
-      );
-
       setBoardName(board.name);
       const sortedColumns = [...(board.columns || [])].sort(
         (a, b) => a.position - b.position,
@@ -232,7 +222,21 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
               }
               className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
             >
-              {isUpdating ? 'Saving...' : 'Save Changes'}
+              {isUpdating ? (
+                <div className='flex items-center gap-2'>
+                  <Image
+                    src='/spinner.svg'
+                    alt='Saving...'
+                    width={16}
+                    height={16}
+                    priority
+                    className='brightness-0 invert'
+                  />
+                  Saving...
+                </div>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
 
             <AlertDialog
@@ -268,7 +272,21 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                     disabled={isDeleting}
                     className='w-full bg-red-600 text-white hover:bg-red-700 sm:w-auto'
                   >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
+                    {isDeleting ? (
+                      <div className='flex items-center gap-2'>
+                        <Image
+                          src='/spinner.svg'
+                          alt='Deleting...'
+                          width={16}
+                          height={16}
+                          priority
+                          className='brightness-0 invert'
+                        />
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete'
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

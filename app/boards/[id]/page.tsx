@@ -5,6 +5,7 @@ import { useBoard } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { useTasks } from '@/hooks/tasks/useTasks';
 import { use, useEffect } from 'react';
+import Image from 'next/image';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -22,8 +23,14 @@ export default function Page({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className='flex h-64 items-center justify-center'>
-        <div className='text-lg'>Loading board...</div>
+      <div className='flex h-64 min-h-screen items-center justify-center'>
+        <Image
+          src='/spinner.svg'
+          alt='Loading board...'
+          width={40}
+          height={40}
+          priority
+        />
       </div>
     );
   }
@@ -47,7 +54,7 @@ export default function Page({ params }: PageProps) {
   return (
     <div>
       <div>
-        <AppTopBar name={board.name} createTask={createTask} />
+        <AppTopBar name={board.name} />
         <div className='flex gap-6 overflow-x-auto p-4'>
           {board.columns.map((column) => (
             <div key={column.id} className='w-80 flex-shrink-0'>

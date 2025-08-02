@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, Plus } from 'lucide-react';
 import { useBoards } from '@/hooks/boards/useBoards';
+import Image from 'next/image';
 
 interface CreateNewBoardDialogProps {
   trigger?: React.ReactNode;
@@ -149,7 +150,21 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
           disabled={!boardName.trim() || isCreating}
           className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
         >
-          {isCreating ? 'Creating...' : 'Create New Board'}
+          {isCreating ? (
+            <div className='flex items-center gap-2'>
+              <Image
+                src='/spinner.svg'
+                alt='Creating...'
+                width={16}
+                height={16}
+                priority
+                className='brightness-0 invert'
+              />
+              Creating...
+            </div>
+          ) : (
+            'Create New Board'
+          )}
         </Button>
       </DialogContent>
     </Dialog>
