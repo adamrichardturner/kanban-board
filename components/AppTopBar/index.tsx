@@ -38,7 +38,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
                 mass: 1,
                 duration: 0.15,
               }}
-              className='p-4'
+              className='pr-12 pl-3'
             >
               <Link href='/boards' className='flex items-center gap-2'>
                 <Image
@@ -55,7 +55,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
         </AnimatePresence>
 
         <motion.h1
-          className='text-[24px] font-bold text-[#000112]'
+          className='pt-1 text-[24px] font-bold text-[#000112]'
           transition={{
             type: 'spring',
             stiffness: 120,
