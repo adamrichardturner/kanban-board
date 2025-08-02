@@ -18,7 +18,12 @@ export function AppTopBar({ name }: AppTopBarProps) {
     useSelectedBoard();
 
   return (
-    <div className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5'>
+    <div
+      className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5'
+      style={{
+        boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
+      }}
+    >
       <div className='flex items-center justify-start'>
         <AnimatePresence mode='wait'>
           {!open && (
