@@ -1,25 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  AuthResponse as ServerAuthResponse,
-  UserResponse,
-  ApiError,
-} from '@/models/User.types';
 import { useRouter } from 'next/navigation';
+import { AuthUser, AuthResponse, ApiResponse } from '@/types';
 
-async function fetchCurrentUser(): Promise<UserResponse> {
+async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch('/api/auth/me');
   if (!res.ok) {
-    const err: ApiError = await res.json();
-    throw new Error(err.message);
+    const err: ApiResponse = await res.json();
+    throw new Error(err.error || 'Failed to fetch user');
   }
-  return res.json();
+  const data: ApiResponse<AuthUser> = await res.json();
+  return data.data!;
 }
 
 export function useCurrentUser() {
-  return useQuery<UserResponse, Error>({
+  return useQuery<AuthUser, Error>({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     staleTime: 1000 * 60 * 5,
+    retry: false,
   });
 }
 
@@ -27,38 +25,93 @@ export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<ServerAuthResponse, Error, void>({
+  const loginMutation = useMutation<AuthResponse, Error, void>({
     mutationFn: async () => {
       const res = await fetch('/api/auth/demo-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      const payload: ServerAuthResponse = await res.json();
-      if (!res.ok) throw new Error('Demo login failed');
-      return payload;
+
+      const payload: ApiResponse<AuthResponse> = await res.json();
+
+      if (!res.ok) {
+        throw new Error(payload.error || 'Demo login failed');
+      }
+
+      return payload.data!;
     },
-    onSuccess: ({ user, accessToken, refreshToken }) => {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      queryClient.setQueryData<UserResponse>(['currentUser'], user);
+    onSuccess: ({ user }) => {
+      // Update the current user cache
+      queryClient.setQueryData<AuthUser>(['currentUser'], user);
       router.push('/boards');
     },
     onError: (err) => {
       console.error('Demo login failed:', err);
-      alert(err.message);
     },
   });
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    queryClient.removeQueries({ queryKey: ['currentUser'] });
-  };
+  const logoutMutation = useMutation<void, Error, void>({
+    mutationFn: async () => {
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        const payload: ApiResponse = await res.json();
+        throw new Error(payload.error || 'Logout failed');
+      }
+    },
+    onSuccess: () => {
+      // Clear all auth-related queries
+      queryClient.removeQueries({ queryKey: ['currentUser'] });
+      queryClient.clear(); // Optional: clear all queries
+      router.push('/login');
+    },
+    onError: (err) => {
+      console.error('Logout failed:', err);
+      // Even if logout API fails, clear local state
+      queryClient.removeQueries({ queryKey: ['currentUser'] });
+      router.push('/login');
+    },
+  });
+
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = useCurrentUser();
 
   return {
-    handleDemoLogin: () => mutation.mutate(),
-    isLoading: mutation.isPending,
-    isError: mutation.isError,
-    error: mutation.error,
-    logout,
+    // User state
+    user: user || null,
+    isAuthenticated: !!user,
+    isLoading:
+      userLoading || loginMutation.isPending || logoutMutation.isPending,
+    error:
+      userError?.message ||
+      loginMutation.error?.message ||
+      logoutMutation.error?.message ||
+      null,
+
+    // Actions
+    demoLogin: () => loginMutation.mutate(),
+    logout: () => logoutMutation.mutate(),
+
+    // Mutation states
+    isLoginLoading: loginMutation.isPending,
+    isLogoutLoading: logoutMutation.isPending,
+    loginError: loginMutation.error?.message || null,
+    logoutError: logoutMutation.error?.message || null,
+
+    // Utility
+    clearError: () => {
+      loginMutation.reset();
+      logoutMutation.reset();
+    },
+
+    refreshAuth: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    },
   };
 }
