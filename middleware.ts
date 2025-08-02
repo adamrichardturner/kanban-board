@@ -1,31 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPostLoginRoute } from './utils/routing';
+
+// Simple function to validate auth token by calling /api/auth/me
+async function validateAuthToken(request: NextRequest): Promise<boolean> {
+  try {
+    const token = request.cookies.get('token')?.value;
+    if (!token) return false;
+
+    // Call the auth API to validate the token
+    const response = await fetch(new URL('/api/auth/me', request.url), {
+      headers: {
+        Cookie: `token=${token}`,
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Token validation failed:', error);
+    return false;
+  }
+}
+
+// Simple fallback route determination
+function getDefaultPostLoginRoute(): string {
+  return '/boards';
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get authentication token
   const authCookie = request.cookies.get('token');
-  const isAuthenticated = !!authCookie?.value;
+  const hasToken = !!authCookie?.value;
 
   // Public routes that don't require authentication
   const publicRoutes = ['/'];
   const isPublicRoute = publicRoutes.includes(pathname);
+
+  // If there's a token, validate it
+  let isAuthenticated = false;
+  if (hasToken) {
+    isAuthenticated = await validateAuthToken(request);
+
+    // If token exists but is invalid, clear it and redirect to home
+    if (!isAuthenticated) {
+      console.log('Invalid token detected, clearing and redirecting to /');
+      const response = NextResponse.redirect(new URL('/', request.url));
+      response.cookies.delete('token');
+      return response;
+    }
+  }
 
   // Redirect unauthenticated users to login
   if (!isAuthenticated && !isPublicRoute) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Redirect authenticated users away from public routes
+  // Redirect authenticated users away from public routes to their dashboard
   if (isAuthenticated && isPublicRoute) {
-    const postLoginRoute = await getPostLoginRoute();
-    return NextResponse.redirect(new URL(postLoginRoute, request.url));
-  }
-
-  // Redirect authenticated users from root to their dashboard
-  if (isAuthenticated && pathname === '/') {
-    const postLoginRoute = await getPostLoginRoute();
+    const postLoginRoute = getDefaultPostLoginRoute();
     return NextResponse.redirect(new URL(postLoginRoute, request.url));
   }
 
