@@ -8,6 +8,7 @@ import {
   UpdateBoardRequest,
 } from '@/types/kanban';
 import { useSelectedBoard } from './useSelectedBoard';
+import { toast } from 'sonner';
 
 export interface CreateBoardWithColumnsRequest {
   name: string;
@@ -126,7 +127,10 @@ export function useBoards() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to create board');
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage =
+          errorData.error || errorData.message || 'Failed to create board';
+        throw new Error(errorMessage);
       }
 
       const response: ApiResponse<BoardResponse> = await res.json();
@@ -154,9 +158,23 @@ export function useBoards() {
       // Set as selected board and navigate
       setSelectedBoard(newBoard.id);
       router.push(`/boards/${newBoard.id}`);
+
+      toast.success('Board created successfully!');
     },
     onError: (error) => {
       console.error('Create board failed:', error);
+
+      // Check if it's a duplicate name error
+      if (
+        error.message.includes('duplicate key') ||
+        error.message.includes('already exists')
+      ) {
+        toast.error(
+          'A board with this name already exists. Please choose a different name.',
+        );
+      } else {
+        toast.error('Failed to create board. Please try again.');
+      }
     },
   });
 
@@ -201,9 +219,12 @@ export function useBoards() {
         'Board update successful, invalidated and refetched caches for board:',
         updatedBoard.id,
       );
+
+      toast.success('Board updated successfully!');
     },
     onError: (error) => {
       console.error('Update board failed:', error);
+      toast.error('Failed to update board. Please try again.');
     },
   });
 
@@ -283,6 +304,7 @@ export function useBoards() {
         }
 
         console.log('Board deleted successfully');
+        toast.success('Board deleted successfully!');
       } catch (error) {
         console.error('Error in delete navigation:', error);
         // Fallback navigation
@@ -304,7 +326,7 @@ export function useBoards() {
       }
 
       console.error('Delete board failed:', error);
-      // You might want to show a toast notification here
+      toast.error('Failed to delete board. Please try again.');
     },
     onSettled: () => {
       // Ensure we have fresh data after the mutation

@@ -15,24 +15,13 @@ export default function Page({ params }: PageProps) {
   const { id } = use(params);
   const { data: board, isLoading, error } = useBoard(id);
   const { setSelectedBoard } = useSelectedBoard();
-  const { createTask } = useTasks();
 
   useEffect(() => {
     setSelectedBoard(id);
   }, [id, setSelectedBoard]);
 
   if (isLoading) {
-    return (
-      <div className='flex h-64 min-h-screen items-center justify-center'>
-        <Image
-          src='/spinner.svg'
-          alt='Loading board...'
-          width={40}
-          height={40}
-          priority
-        />
-      </div>
-    );
+    return null;
   }
 
   if (error) {

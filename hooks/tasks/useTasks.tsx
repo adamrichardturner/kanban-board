@@ -108,10 +108,10 @@ export function useTasks() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['boards', newTask.boardId] });
-      toast(`Task created successfully!`);
+      toast.success('Task created successfully!');
     },
     onError: (error) => {
-      toast(`Failed to create task`);
+      toast.error('Failed to create task');
       console.error('Create task failed:', error);
     },
   });
@@ -158,10 +158,10 @@ export function useTasks() {
       queryClient.invalidateQueries({
         queryKey: ['boards', newTaskWithSubtasks.boardId],
       });
-      toast(`Task created successfully!`);
+      toast.success('Task created successfully!');
     },
     onError: (error) => {
-      toast(`Failed to create task with subtasks`);
+      toast.error('Failed to create task with subtasks');
       console.error('Create task with subtasks failed:', error);
     },
   });
@@ -220,7 +220,7 @@ export function useTasks() {
         queryKey: ['boards', updatedTask.boardId],
       });
 
-      toast(`Task updated successfully!`);
+      toast.success('Task updated successfully!');
     },
     onError: (error) => {
       console.error('Update task failed:', error);
@@ -263,7 +263,7 @@ export function useTasks() {
 
       queryClient.removeQueries({ queryKey: ['tasks', taskId] });
       queryClient.removeQueries({ queryKey: ['subtasks', 'task', taskId] });
-      toast(`Task deleted`);
+      toast.success('Task deleted');
     },
     onError: (error) => {
       console.error('Delete task failed:', error);
@@ -427,10 +427,10 @@ export function useTasks() {
             : undefined;
         },
       );
-      toast(`Subtask created successfully!`);
+      toast.success('Subtask created successfully!');
     },
     onError: (error) => {
-      toast(`Failed to create subtask`);
+      toast.error('Failed to create subtask');
       console.error('Create subtask failed:', error);
     },
   });
@@ -478,7 +478,7 @@ export function useTasks() {
             : undefined;
         },
       );
-      toast(`Subtask updated successfully!`);
+      toast.success('Subtask updated successfully!');
     },
     onError: (error) => {
       console.error('Update subtask failed:', error);
@@ -537,7 +537,7 @@ export function useTasks() {
               : undefined;
           },
         );
-        toast(`Subtask deleted`);
+        toast.success('Subtask deleted');
       }
     },
     onError: (error) => {

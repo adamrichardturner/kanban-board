@@ -85,10 +85,10 @@ export function useAuth() {
       // Get the route (it will be cached from the invalidation above)
       const route = await fetchPostLoginRoute();
       router.push(route);
-      toast(`${user.fullName} logged in successfully!`);
+      toast.success(`${user.fullName} logged in successfully!`);
     },
     onError: (err) => {
-      toast(`Demo login failed`);
+      toast.error('Demo login failed');
       console.error('Demo login failed:', err);
     },
   });
