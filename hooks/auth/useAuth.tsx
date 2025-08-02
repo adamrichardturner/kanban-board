@@ -1,7 +1,8 @@
+'use client';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { AuthUser, AuthResponse, ApiResponse } from '@/types';
-import { getPostLoginRoute } from '@/utils/routing';
+import { AuthUser, AuthResponse, ApiResponse, BoardResponse } from '@/types';
 
 async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch('/api/auth/me');
@@ -12,12 +13,46 @@ async function fetchCurrentUser(): Promise<AuthUser> {
   return data.data!;
 }
 
+async function fetchPostLoginRoute(): Promise<string> {
+  try {
+    const res = await fetch('/api/boards');
+    if (!res.ok) {
+      return '/boards';
+    }
+
+    const data: ApiResponse<BoardResponse[]> = await res.json();
+    const boards = data.data;
+
+    if (boards && boards.length > 0) {
+      const sortedBoards = boards.sort((a, b) => a.position - b.position);
+      return `/boards/${sortedBoards[0].id}`;
+    }
+
+    return '/boards';
+  } catch (error) {
+    console.error('Failed to determine post-login route:', error);
+    return '/boards';
+  }
+}
+
 export function useCurrentUser() {
   return useQuery<AuthUser, Error>({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     staleTime: 1000 * 60 * 5,
     retry: false,
+  });
+}
+
+export function usePostLoginRoute() {
+  const { isAuthenticated } = useAuth();
+
+  return useQuery<string, Error>({
+    queryKey: ['postLoginRoute'],
+    queryFn: fetchPostLoginRoute,
+    enabled: isAuthenticated, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 2, // Cache for 2 minutes
+    retry: 1,
   });
 }
 
@@ -42,7 +77,12 @@ export function useAuth() {
     onSuccess: async ({ user }) => {
       // Update the current user cache
       queryClient.setQueryData<AuthUser>(['currentUser'], user);
-      const route = await getPostLoginRoute();
+
+      // Invalidate post-login route so it gets refetched
+      queryClient.invalidateQueries({ queryKey: ['postLoginRoute'] });
+
+      // Get the route (it will be cached from the invalidation above)
+      const route = await fetchPostLoginRoute();
       router.push(route);
     },
     onError: (err) => {
@@ -62,15 +102,15 @@ export function useAuth() {
       }
     },
     onSuccess: () => {
-      // Clear all auth-related queries
       queryClient.removeQueries({ queryKey: ['currentUser'] });
-      queryClient.clear(); // Optional: clear all queries
+      queryClient.removeQueries({ queryKey: ['postLoginRoute'] });
+      queryClient.clear();
       router.push('/login');
     },
     onError: (err) => {
       console.error('Logout failed:', err);
-      // Even if logout API fails, clear local state
       queryClient.removeQueries({ queryKey: ['currentUser'] });
+      queryClient.removeQueries({ queryKey: ['postLoginRoute'] });
       router.push('/login');
     },
   });
@@ -82,7 +122,6 @@ export function useAuth() {
   } = useCurrentUser();
 
   return {
-    // User state
     user: user || null,
     isAuthenticated: !!user,
     isLoading:
@@ -92,25 +131,19 @@ export function useAuth() {
       loginMutation.error?.message ||
       logoutMutation.error?.message ||
       null,
-
-    // Actions
     handleDemoLogin: () => loginMutation.mutate(),
     logout: () => logoutMutation.mutate(),
-
-    // Mutation states
     isLoginLoading: loginMutation.isPending,
     isLogoutLoading: logoutMutation.isPending,
     loginError: loginMutation.error?.message || null,
     logoutError: logoutMutation.error?.message || null,
-
-    // Utility
     clearError: () => {
       loginMutation.reset();
       logoutMutation.reset();
     },
-
     refreshAuth: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['postLoginRoute'] });
     },
   };
 }

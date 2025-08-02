@@ -4,6 +4,7 @@ import Image from 'next/image';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import { useSidebar } from '../ui/sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 interface AppTopBarProps {
   name: string;
@@ -31,13 +32,16 @@ export function AppTopBar({ name, createTask }: AppTopBarProps) {
               }}
               className='p-4'
             >
-              <Image
-                src={KanBanLogo}
-                alt='Kanban Board Logo'
-                width={150}
-                height={40}
-                className='dark:invert'
-              />
+              <Link href='/boards' className='flex items-center gap-2'>
+                <Image
+                  src={KanBanLogo}
+                  alt='Kanban Board Logo'
+                  height={26}
+                  style={{ width: 'auto', height: '26px' }}
+                  className='dark:invert'
+                  priority
+                />
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>

@@ -31,13 +31,16 @@ export function AppSidebar() {
     >
       <SidebarHeader className='pb-[54px]'>
         <div className='p-4'>
-          <Image
-            src={KanBanLogo}
-            alt='Kanban Board Logo'
-            width={150}
-            height={40}
-            className='dark:invert'
-          />
+          <Link href='/boards' className='flex items-center gap-2'>
+            <Image
+              src={KanBanLogo}
+              alt='Kanban Board Logo'
+              height={26}
+              style={{ width: 'auto', height: '26px' }}
+              className='dark:invert'
+              priority
+            />
+          </Link>
         </div>
       </SidebarHeader>
 
@@ -100,7 +103,13 @@ export function AppSidebar() {
           </SidebarGroup>
         ) : (
           <div className='flex w-full items-center justify-center'>
-            <Image alt='Loading' src={LoadingSpinner} height={20} width={20} />
+            <Image
+              alt='Loading'
+              src={LoadingSpinner}
+              height={20}
+              width={20}
+              priority
+            />
           </div>
         )}
       </SidebarContent>
