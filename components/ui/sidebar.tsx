@@ -272,7 +272,7 @@ function SidebarTrigger({
         'transition-[transform,opacity,width,height] duration-200',
         // When sidebar is closed (show button prominently)
         !open &&
-          'fixed bottom-[38px] left-[0px] size-12 justify-center rounded-r-full bg-[#635FC7] hover:bg-[#A8A4FF] active:bg-[#635FC7]/80',
+          'fixed bottom-[38px] left-[0px] h-[48px] w-[56px] justify-center rounded-r-full bg-[#635FC7] hover:bg-[#A8A4FF] active:bg-[#635FC7]/80',
         // When sidebar is open (subtle button in sidebar)
         open &&
           'fixed bottom-[38px] left-4 min-w-fit rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',
@@ -297,10 +297,13 @@ function SidebarTrigger({
               type: 'spring',
               stiffness: 300,
             }}
-            className='flex items-center gap-2'
+            className='flex items-center gap-3'
           >
-            <EyeOff className='h-4 w-4 flex-shrink-0 text-gray-600 dark:text-gray-400' />
-            <span className='text-sm font-medium whitespace-nowrap text-gray-600 dark:text-gray-400'>
+            <EyeOff
+              size={48}
+              className='h-4 w-4 flex-shrink-0 text-[#828FA3] dark:text-gray-400'
+            />
+            <span className='text-sm font-medium whitespace-nowrap text-[#828FA3] dark:text-gray-400'>
               Hide Sidebar
             </span>
           </motion.div>
@@ -319,7 +322,7 @@ function SidebarTrigger({
             }}
             className='flex items-center justify-center'
           >
-            <Eye className='h-5 w-5 text-white' />
+            <Eye size={48} className='mr-1 h-5 w-5 text-white' />
           </motion.div>
         )}
       </AnimatePresence>

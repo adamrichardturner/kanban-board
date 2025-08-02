@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

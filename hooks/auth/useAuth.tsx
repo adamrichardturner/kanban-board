@@ -31,8 +31,6 @@ export function useAuth() {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      console.log('RES IS: ', res);
-
       if (!res.ok) {
         throw new Error('Demo login failed');
       }
