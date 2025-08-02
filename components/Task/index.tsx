@@ -10,10 +10,10 @@ export function Task({ task }: { task: TaskWithSubtasks }) {
       }}
     >
       <CardHeader>
-        <CardTitle>{task.title}</CardTitle>
+        <CardTitle className='text-[#000112]'>{task.title}</CardTitle>
         <CardContent className='px-0'>
           {task.subtasks && task.subtasks.length > 0 && (
-            <span className='text-xs text-gray-500'>
+            <span className='text-xs text-[#828FA3]'>
               {task.subtasks.filter((st) => st.status === 'done').length} of{' '}
               {task.subtasks.length} subtasks
             </span>
