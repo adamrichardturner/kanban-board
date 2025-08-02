@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { AuthUser, AuthResponse, ApiResponse } from '@/types';
+import { getPostLoginRoute } from '@/utils/routing';
 
 async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch('/api/auth/me');
@@ -38,10 +39,11 @@ export function useAuth() {
       const payload: ApiResponse<AuthResponse> = await res.json();
       return payload.data!;
     },
-    onSuccess: ({ user }) => {
+    onSuccess: async ({ user }) => {
       // Update the current user cache
       queryClient.setQueryData<AuthUser>(['currentUser'], user);
-      router.push('/boards');
+      const route = await getPostLoginRoute();
+      router.push(route);
     },
     onError: (err) => {
       console.error('Demo login failed:', err);

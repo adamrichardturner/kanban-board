@@ -8,47 +8,29 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Calendar, Home, Inbox, Link, Search, Settings } from 'lucide-react';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
-import LoadingSpinner from "@/public/spinner.svg";
-
-// Menu items
-const items = [
-  {
-    title: 'Home',
-    url: '#',
-    icon: Home,
-  },
-  {
-    title: 'Inbox',
-    url: '#',
-    icon: Inbox,
-  },
-  {
-    title: 'Calendar',
-    url: '#',
-    icon: Calendar,
-  },
-  {
-    title: 'Search',
-    url: '#',
-    icon: Search,
-  },
-  {
-    title: 'Settings',
-    url: '#',
-    icon: Settings,
-  },
-];
+import LoadingSpinner from '@/public/spinner.svg';
+import { Reorder } from 'framer-motion';
+import { BoardResponse } from '@/types';
 
 export function AppSidebar() {
-  const { boards, isLoading } = useBoards();
+  const { boards, reorderBoards, isLoading } = useBoards();
+
+  const handleReorder = (newOrder: BoardResponse[]) => {
+    const reorderData = {
+      items: newOrder.map((board, index) => ({
+        id: board.id,
+        position: index,
+      })),
+    };
+    reorderBoards(reorderData);
+  };
 
   return (
     <Sidebar
@@ -69,23 +51,49 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {!isLoading ? <SidebarGroup>
-          <SidebarGroupLabel className="text-[#828FA3] text-[12px] semibold tracking-[2.4px] uppercase">All Boards ({boards.length})</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {boards.map((board) => (
-                <Link href={`/boards/${board.id}`} className="flex items-center gap-2" key={board.id}>
-                <SidebarMenuItem >
-                  <SidebarMenuButton asChild>
-                    
-                    
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                </Link>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> : <div className="w-full flex items-center justify-center"><Image alt="Loading" src={LoadingSpinner} height={20} width={20} /></div> }
+        {!isLoading ? (
+          <SidebarGroup>
+            <SidebarGroupLabel className='semibold text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
+              All Boards ({boards.length})
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <Reorder.Group
+                values={boards}
+                onReorder={handleReorder}
+                className='flex min-h-0 w-full flex-col text-sm group-has-[[data-sidebar=menu-action]]/sidebar-group:space-y-1'
+                as='ul'
+              >
+                {boards.map((board) => (
+                  <Reorder.Item
+                    key={board.id}
+                    value={board}
+                    className='cursor-grab active:cursor-grabbing'
+                    as='li'
+                  >
+                    <SidebarMenuButton asChild>
+                      <Link
+                        href={`/boards/${board.id}`}
+                        className='flex w-full items-center gap-2'
+                      >
+                        <Image
+                          src='/boards/board-icon-regular.svg'
+                          alt='Board Icon'
+                          width={16}
+                          height={16}
+                        />
+                        <span className='truncate'>{board.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : (
+          <div className='flex w-full items-center justify-center'>
+            <Image alt='Loading' src={LoadingSpinner} height={20} width={20} />
+          </div>
+        )}
 
         <SidebarGroup>
           <SidebarGroupLabel>Boards</SidebarGroupLabel>
