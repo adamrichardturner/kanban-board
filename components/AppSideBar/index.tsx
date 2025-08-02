@@ -12,9 +12,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
+import { Calendar, Home, Inbox, Link, Search, Settings } from 'lucide-react';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import Image from 'next/image';
+import { useBoards } from '@/hooks/boards/useBoards';
+import LoadingSpinner from "@/public/spinner.svg";
 
 // Menu items
 const items = [
@@ -46,6 +48,8 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { boards, isLoading } = useBoards();
+
   return (
     <Sidebar
       className='bg-white shadow-lg dark:bg-gray-900'
@@ -65,23 +69,23 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+        {!isLoading ? <SidebarGroup>
+          <SidebarGroupLabel className="text-[#828FA3] text-[12px] semibold tracking-[2.4px] uppercase">All Boards ({boards.length})</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {boards.map((board) => (
+                <Link href={`/boards/${board.id}`} className="flex items-center gap-2" key={board.id}>
+                <SidebarMenuItem >
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className='flex items-center gap-2'>
-                      <item.icon className='h-4 w-4' />
-                      <span>{item.title}</span>
-                    </a>
+                    
+                    
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                </Link>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> : <div className="w-full flex items-center justify-center"><Image alt="Loading" src={LoadingSpinner} height={20} width={20} /></div> }
 
         <SidebarGroup>
           <SidebarGroupLabel>Boards</SidebarGroupLabel>
