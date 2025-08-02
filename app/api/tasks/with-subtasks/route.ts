@@ -3,10 +3,6 @@ import { TaskController } from '@/controllers/task.controller';
 
 const taskController = new TaskController();
 
-export async function GET(request: NextRequest) {
-  return taskController.getColumnTasks(request);
-}
-
 export async function POST(request: NextRequest) {
-  return taskController.createTask(request);
+  return taskController.createTaskWithSubtasks(request);
 }

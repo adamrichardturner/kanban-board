@@ -21,7 +21,35 @@ export class ColumnRepository {
     return queryOne<Column>(sql, [id]);
   }
 
+  // Updated create method to accept position parameter
   async create(
+    boardId: string,
+    name: string,
+    position: number,
+    color: string = '#3B82F6',
+  ): Promise<Column> {
+    const sql = `
+      INSERT INTO columns (board_id, name, position, color)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, board_id, name, position, color, created_at, updated_at
+    `;
+
+    const newColumn = await queryOne<Column>(sql, [
+      boardId,
+      name,
+      position,
+      color,
+    ]);
+
+    if (!newColumn) {
+      throw new Error('Failed to create column');
+    }
+
+    return newColumn;
+  }
+
+  // Alternative create method that auto-calculates position (for backward compatibility)
+  async createWithAutoPosition(
     boardId: string,
     name: string,
     color: string = '#3B82F6',
@@ -102,6 +130,7 @@ export class ColumnRepository {
   }
 
   async delete(id: string): Promise<boolean> {
+    // Note: Make sure your database has CASCADE constraints to delete related tasks/subtasks
     const sql = `DELETE FROM columns WHERE id = $1`;
     const result = await query(sql, [id]);
     return result.length > 0;

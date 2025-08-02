@@ -14,6 +14,7 @@ import {
 
 export function useTasks() {
   const queryClient = useQueryClient();
+
   const getColumnTasks = async (columnId: string): Promise<TaskResponse[]> => {
     const res = await fetch(`/api/tasks?columnId=${columnId}`);
     if (!res.ok) {
@@ -70,6 +71,7 @@ export function useTasks() {
     });
   };
 
+  // Standard task creation mutation
   const createTaskMutation = useMutation<
     TaskResponse,
     Error,
@@ -89,16 +91,73 @@ export function useTasks() {
       const response: ApiResponse<TaskResponse> = await res.json();
       return response.data!;
     },
-    onSuccess: (newTask) => {
+    onSuccess: (newTask, { data }) => {
       queryClient.setQueryData<TaskResponse[]>(
         ['tasks', 'column', newTask.columnId],
         (old) => (old ? [...old, newTask] : [newTask]),
       );
 
+      // If subtasks were created, we need to refetch the task details
+      // to get the complete task with subtasks
+      if (data.subtasks && data.subtasks.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['tasks', newTask.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['subtasks', 'task', newTask.id],
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['boards', newTask.boardId] });
     },
     onError: (error) => {
       console.error('Create task failed:', error);
+    },
+  });
+
+  // Enhanced task creation mutation (returns TaskWithSubtasks)
+  const createTaskWithSubtasksMutation = useMutation<
+    TaskWithSubtasks,
+    Error,
+    { boardId: string; data: CreateTaskRequest }
+  >({
+    mutationFn: async ({ boardId, data }) => {
+      const res = await fetch(`/api/tasks/with-subtasks?boardId=${boardId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to create task with subtasks');
+      }
+
+      const response: ApiResponse<TaskWithSubtasks> = await res.json();
+      return response.data!;
+    },
+    onSuccess: (newTaskWithSubtasks) => {
+      // Update the column tasks query with the basic task info
+      queryClient.setQueryData<TaskResponse[]>(
+        ['tasks', 'column', newTaskWithSubtasks.columnId],
+        (old) => (old ? [...old, newTaskWithSubtasks] : [newTaskWithSubtasks]),
+      );
+
+      // Set the full task with subtasks
+      queryClient.setQueryData(
+        ['tasks', newTaskWithSubtasks.id],
+        newTaskWithSubtasks,
+      );
+
+      // Set the subtasks
+      queryClient.setQueryData(
+        ['subtasks', 'task', newTaskWithSubtasks.id],
+        newTaskWithSubtasks.subtasks,
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ['boards', newTaskWithSubtasks.boardId],
+      });
+    },
+    onError: (error) => {
+      console.error('Create task with subtasks failed:', error);
     },
   });
 
@@ -542,6 +601,8 @@ export function useTasks() {
     // Task actions
     createTask: (boardId: string, data: CreateTaskRequest) =>
       createTaskMutation.mutate({ boardId, data }),
+    createTaskWithSubtasks: (boardId: string, data: CreateTaskRequest) =>
+      createTaskWithSubtasksMutation.mutate({ boardId, data }),
     updateTask: (taskId: string, data: UpdateTaskRequest) =>
       updateTaskMutation.mutate({ taskId, data }),
     deleteTask: (taskId: string) => deleteTaskMutation.mutate(taskId),
@@ -562,6 +623,7 @@ export function useTasks() {
 
     // Mutation states
     isCreatingTask: createTaskMutation.isPending,
+    isCreatingTaskWithSubtasks: createTaskWithSubtasksMutation.isPending, // ← Added this
     isUpdatingTask: updateTaskMutation.isPending,
     isDeletingTask: deleteTaskMutation.isPending,
     isMovingTask: moveTaskMutation.isPending,
@@ -575,6 +637,7 @@ export function useTasks() {
     // Error states
     taskError:
       createTaskMutation.error?.message ||
+      createTaskWithSubtasksMutation.error?.message || // ← Added this
       updateTaskMutation.error?.message ||
       deleteTaskMutation.error?.message ||
       moveTaskMutation.error?.message ||

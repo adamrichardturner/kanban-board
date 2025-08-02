@@ -18,6 +18,27 @@ export interface BoardResponse {
   updatedAt: Date;
 }
 
+export interface UpdateBoardRequest {
+  name?: string;
+  isDefault?: boolean;
+  position?: number;
+  columns?: {
+    id?: string;
+    name: string;
+    position: number;
+    isNew?: boolean;
+  }[];
+}
+
+export interface CreateBoardRequest {
+  name: string;
+  isDefault?: boolean;
+  columns?: {
+    name: string;
+    position: number;
+  }[];
+}
+
 export interface Column {
   id: string;
   board_id: string;
@@ -33,7 +54,7 @@ export interface ColumnResponse {
   boardId: string;
   name: string;
   position: number;
-  color: string;
+  color?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,6 +115,12 @@ export interface UpdateBoardRequest {
   name?: string;
   isDefault?: boolean;
   position?: number;
+  columns?: {
+    id?: string; // undefined for new columns
+    name: string;
+    position: number;
+    isNew?: boolean; // flag to indicate new columns
+  }[];
 }
 
 export interface CreateColumnRequest {
@@ -112,6 +139,7 @@ export interface CreateTaskRequest {
   title: string;
   description?: string;
   status?: TaskStatus;
+  subtasks?: CreateSubtaskRequest[];
 }
 
 export interface UpdateTaskRequest {
@@ -147,7 +175,7 @@ export interface BoardWithColumns extends BoardResponse {
 }
 
 export interface ColumnWithTasks extends ColumnResponse {
-  tasks: TaskResponse[];
+  tasks: TaskWithSubtasks[];
 }
 
 export interface TaskWithSubtasks extends TaskResponse {

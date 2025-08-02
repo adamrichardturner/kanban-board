@@ -1,4 +1,3 @@
-// services/task.service.ts
 import { TaskRepository } from '@/repositories/task.repository';
 import { ColumnRepository } from '@/repositories/column.repository';
 import { BoardRepository } from '@/repositories/board.repository';
@@ -97,15 +96,75 @@ export class TaskService {
       throw new Error('Column not found or does not belong to the board');
     }
 
-    const task = await this.taskRepository.create(
+    // Prepare subtasks data if provided
+    const subtasksData =
+      data.subtasks?.map((subtask) => ({
+        title: subtask.title,
+        status: subtask.status || ('todo' as TaskStatus),
+      })) || [];
+
+    // Create task with subtasks
+    if (subtasksData.length > 0) {
+      const { task } = await this.taskRepository.createWithSubtasks(
+        boardId,
+        data.columnId,
+        data.title,
+        data.description,
+        data.status,
+        subtasksData,
+      );
+      return this.mapTaskResponse(task);
+    } else {
+      // Create task without subtasks (original behavior)
+      const task = await this.taskRepository.create(
+        boardId,
+        data.columnId,
+        data.title,
+        data.description,
+        data.status,
+      );
+      return this.mapTaskResponse(task);
+    }
+  }
+
+  async createTaskWithSubtasks(
+    boardId: string,
+    userId: string,
+    data: CreateTaskRequest,
+  ): Promise<TaskWithSubtasks> {
+    // Verify user owns the board
+    const board = await this.boardRepository.findById(boardId, userId);
+    if (!board) {
+      throw new Error('Board not found');
+    }
+
+    // Verify the column belongs to the board
+    const column = await this.columnRepository.findById(data.columnId);
+    if (!column || column.board_id !== boardId) {
+      throw new Error('Column not found or does not belong to the board');
+    }
+
+    // Prepare subtasks data if provided
+    const subtasksData =
+      data.subtasks?.map((subtask) => ({
+        title: subtask.title,
+        status: subtask.status || ('todo' as TaskStatus),
+      })) || [];
+
+    // Create task with subtasks
+    const { task, subtasks } = await this.taskRepository.createWithSubtasks(
       boardId,
       data.columnId,
       data.title,
       data.description,
       data.status,
+      subtasksData,
     );
 
-    return this.mapTaskResponse(task);
+    return {
+      ...this.mapTaskResponse(task),
+      subtasks: subtasks.map((subtask) => this.mapSubtaskResponse(subtask)),
+    };
   }
 
   async updateTask(

@@ -1,5 +1,10 @@
 import { query, queryOne } from '@/lib/db';
-import { Task, TaskStatus } from '@/types/kanban';
+import { Task, TaskStatus, Subtask } from '@/types/kanban';
+
+interface CreateSubtaskData {
+  title: string;
+  status?: TaskStatus;
+}
 
 export class TaskRepository {
   async findByBoardId(boardId: string): Promise<Task[]> {
@@ -37,6 +42,7 @@ export class TaskRepository {
     title: string,
     description?: string,
     status: TaskStatus = 'todo',
+    subtasks?: CreateSubtaskData[],
   ): Promise<Task> {
     // Get the next position within the column
     const positionSql = `
@@ -69,7 +75,93 @@ export class TaskRepository {
       throw new Error('Failed to create task');
     }
 
+    // Create subtasks if provided
+    if (subtasks && subtasks.length > 0) {
+      await this.createSubtasks(newTask.id, subtasks);
+    }
+
     return newTask;
+  }
+
+  private async createSubtasks(
+    taskId: string,
+    subtasks: CreateSubtaskData[],
+  ): Promise<void> {
+    for (let i = 0; i < subtasks.length; i++) {
+      const subtask = subtasks[i];
+      const position = i + 1; // Start positions from 1
+
+      const subtaskSql = `
+        INSERT INTO subtasks (task_id, title, status, position)
+        VALUES ($1, $2, $3, $4)
+      `;
+
+      await query(subtaskSql, [
+        taskId,
+        subtask.title,
+        subtask.status || 'todo',
+        position,
+      ]);
+    }
+  }
+
+  async createWithSubtasks(
+    boardId: string,
+    columnId: string,
+    title: string,
+    description?: string,
+    status: TaskStatus = 'todo',
+    subtasks?: CreateSubtaskData[],
+  ): Promise<{ task: Task; subtasks: Subtask[] }> {
+    // Begin transaction (you might need to implement transaction support in your db lib)
+    // For now, we'll do it sequentially but you should consider adding transaction support
+
+    const task = await this.create(
+      boardId,
+      columnId,
+      title,
+      description,
+      status,
+    );
+
+    let createdSubtasks: Subtask[] = [];
+
+    if (subtasks && subtasks.length > 0) {
+      createdSubtasks = await this.createSubtasksAndReturn(task.id, subtasks);
+    }
+
+    return { task, subtasks: createdSubtasks };
+  }
+
+  private async createSubtasksAndReturn(
+    taskId: string,
+    subtasks: CreateSubtaskData[],
+  ): Promise<Subtask[]> {
+    const createdSubtasks: Subtask[] = [];
+
+    for (let i = 0; i < subtasks.length; i++) {
+      const subtask = subtasks[i];
+      const position = i + 1;
+
+      const subtaskSql = `
+        INSERT INTO subtasks (task_id, title, status, position)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, task_id, title, status, position, created_at, updated_at
+      `;
+
+      const createdSubtask = await queryOne<Subtask>(subtaskSql, [
+        taskId,
+        subtask.title,
+        subtask.status || 'todo',
+        position,
+      ]);
+
+      if (createdSubtask) {
+        createdSubtasks.push(createdSubtask);
+      }
+    }
+
+    return createdSubtasks;
   }
 
   async update(
@@ -128,6 +220,9 @@ export class TaskRepository {
   }
 
   async delete(id: string): Promise<boolean> {
+    // Delete subtasks first (if not handled by CASCADE)
+    await query('DELETE FROM subtasks WHERE task_id = $1', [id]);
+
     const sql = `DELETE FROM tasks WHERE id = $1`;
     const result = await query(sql, [id]);
     return result.length > 0;

@@ -119,9 +119,16 @@ export class BoardService {
     boardId: string,
     userId: string,
     data: UpdateBoardRequest,
-  ): Promise<BoardResponse | null> {
-    const updates: BoardUpdateFields = {};
+  ): Promise<BoardWithColumns | null> {
+    // ← Changed return type from BoardResponse to BoardWithColumns
+    // Verify user owns the board
+    const existingBoard = await this.boardRepository.findById(boardId, userId);
+    if (!existingBoard) {
+      return null;
+    }
 
+    // Prepare board updates
+    const updates: BoardUpdateFields = {};
     if (data.name !== undefined) {
       updates.name = data.name;
     }
@@ -132,9 +139,19 @@ export class BoardService {
       updates.is_default = data.isDefault;
     }
 
-    const board = await this.boardRepository.update(boardId, userId, updates);
-    if (!board) {
+    // Update board basic info
+    const updatedBoard = await this.boardRepository.update(
+      boardId,
+      userId,
+      updates,
+    );
+    if (!updatedBoard) {
       return null;
+    }
+
+    // Handle column updates if provided
+    if (data.columns) {
+      await this.updateBoardColumns(boardId, data.columns);
     }
 
     // If this is set as default, ensure no other boards are default
@@ -142,7 +159,52 @@ export class BoardService {
       await this.boardRepository.setDefault(boardId, userId);
     }
 
-    return this.mapBoardResponse(board);
+    // Return complete board with columns (not just BoardResponse)
+    return this.getBoardWithColumns(boardId, userId);
+  }
+
+  // Add this method if it doesn't exist
+  private async updateBoardColumns(
+    boardId: string,
+    columnsData: {
+      id?: string;
+      name: string;
+      position: number;
+      isNew?: boolean;
+    }[],
+  ): Promise<void> {
+    // Get existing columns
+    const existingColumns = await this.columnRepository.findByBoardId(boardId);
+    const existingColumnIds = existingColumns.map((col) => col.id);
+    const providedColumnIds = columnsData
+      .filter((col) => col.id && !col.isNew)
+      .map((col) => col.id!);
+
+    // Delete columns that are no longer in the update
+    const columnsToDelete = existingColumnIds.filter(
+      (id) => !providedColumnIds.includes(id),
+    );
+    for (const columnId of columnsToDelete) {
+      await this.columnRepository.delete(columnId);
+    }
+
+    // Update or create columns
+    for (const columnData of columnsData) {
+      if (columnData.id && !columnData.isNew) {
+        // Update existing column
+        await this.columnRepository.update(columnData.id, {
+          name: columnData.name,
+          position: columnData.position,
+        });
+      } else {
+        // Create new column
+        await this.columnRepository.create(
+          boardId,
+          columnData.name,
+          columnData.position,
+        );
+      }
+    }
   }
 
   async deleteBoard(boardId: string, userId: string): Promise<boolean> {

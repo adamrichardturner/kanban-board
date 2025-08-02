@@ -117,6 +117,53 @@ export class BoardController {
         });
       }
 
+      // Validate board name if provided
+      if (data.name !== undefined && !data.name.trim()) {
+        const errorResponse: ApiResponse = {
+          error: 'Board name cannot be empty',
+        };
+        return NextResponse.json(errorResponse, {
+          status: HTTP_STATUS.BAD_REQUEST,
+        });
+      }
+
+      // Validate columns if provided
+      if (data.columns) {
+        if (data.columns.length === 0) {
+          const errorResponse: ApiResponse = {
+            error: 'Board must have at least one column',
+          };
+          return NextResponse.json(errorResponse, {
+            status: HTTP_STATUS.BAD_REQUEST,
+          });
+        }
+
+        for (const column of data.columns) {
+          if (!column.name.trim()) {
+            const errorResponse: ApiResponse = {
+              error: 'All columns must have a name',
+            };
+            return NextResponse.json(errorResponse, {
+              status: HTTP_STATUS.BAD_REQUEST,
+            });
+          }
+        }
+
+        // Check for duplicate column names
+        const columnNames = data.columns.map((col) =>
+          col.name.trim().toLowerCase(),
+        );
+        const uniqueNames = new Set(columnNames);
+        if (columnNames.length !== uniqueNames.size) {
+          const errorResponse: ApiResponse = {
+            error: 'Column names must be unique',
+          };
+          return NextResponse.json(errorResponse, {
+            status: HTTP_STATUS.BAD_REQUEST,
+          });
+        }
+      }
+
       const board = await this.boardService.updateBoard(boardId, userId, data);
 
       if (!board) {
@@ -128,7 +175,7 @@ export class BoardController {
         });
       }
 
-      const response: ApiResponse<BoardResponse> = {
+      const response: ApiResponse<BoardWithColumns> = {
         data: board,
         message: 'Board updated successfully',
       };

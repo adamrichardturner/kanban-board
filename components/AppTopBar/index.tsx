@@ -1,18 +1,21 @@
-import { CreateTaskRequest } from '@/types/kanban';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import Image from 'next/image';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import { useSidebar } from '../ui/sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
+import { Edit, EllipsisVertical } from 'lucide-react';
+import { EditBoardDialog } from './EditBoardDialog';
 
 interface AppTopBarProps {
   name: string;
-  createTask: (boardId: string, data: CreateTaskRequest) => void;
 }
 
-export function AppTopBar({ name, createTask }: AppTopBarProps) {
+export function AppTopBar({ name }: AppTopBarProps) {
   const { open } = useSidebar();
+  const { selectedBoard, selectedBoardId, todoColumnId, isLoadingSelection } =
+    useSelectedBoard();
 
   return (
     <div className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5'>
@@ -60,7 +63,13 @@ export function AppTopBar({ name, createTask }: AppTopBarProps) {
         </motion.h1>
       </div>
 
-      <CreateTaskDialog />
+      <div className='flex items-center gap-4'>
+        <CreateTaskDialog
+          boardId={selectedBoardId}
+          defaultColumnId={todoColumnId}
+        />
+        <EditBoardDialog board={selectedBoard} />
+      </div>
     </div>
   );
 }

@@ -109,6 +109,20 @@ export class TaskController {
         });
       }
 
+      // Validate subtasks if provided
+      if (data.subtasks && Array.isArray(data.subtasks)) {
+        for (const subtask of data.subtasks) {
+          if (!subtask.title?.trim()) {
+            const errorResponse: ApiResponse = {
+              error: 'All subtasks must have a title',
+            };
+            return NextResponse.json(errorResponse, {
+              status: HTTP_STATUS.BAD_REQUEST,
+            });
+          }
+        }
+      }
+
       const task = await this.taskService.createTask(boardId, userId, data);
 
       const response: ApiResponse<TaskResponse> = {
@@ -119,6 +133,62 @@ export class TaskController {
       return NextResponse.json(response, { status: HTTP_STATUS.CREATED });
     } catch (error) {
       return this.handleError(error, 'Failed to create task');
+    }
+  }
+
+  async createTaskWithSubtasks(request: NextRequest): Promise<NextResponse> {
+    try {
+      const userId = await this.getUserId();
+      const url = new URL(request.url);
+      const boardId = url.searchParams.get('boardId');
+      const data: CreateTaskRequest = await request.json();
+
+      if (!boardId) {
+        const errorResponse: ApiResponse = {
+          error: 'Board ID is required',
+        };
+        return NextResponse.json(errorResponse, {
+          status: HTTP_STATUS.BAD_REQUEST,
+        });
+      }
+
+      if (!data.columnId || !data.title?.trim()) {
+        const errorResponse: ApiResponse = {
+          error: 'Column ID and task title are required',
+        };
+        return NextResponse.json(errorResponse, {
+          status: HTTP_STATUS.BAD_REQUEST,
+        });
+      }
+
+      // Validate subtasks if provided
+      if (data.subtasks && Array.isArray(data.subtasks)) {
+        for (const subtask of data.subtasks) {
+          if (!subtask.title?.trim()) {
+            const errorResponse: ApiResponse = {
+              error: 'All subtasks must have a title',
+            };
+            return NextResponse.json(errorResponse, {
+              status: HTTP_STATUS.BAD_REQUEST,
+            });
+          }
+        }
+      }
+
+      const taskWithSubtasks = await this.taskService.createTaskWithSubtasks(
+        boardId,
+        userId,
+        data,
+      );
+
+      const response: ApiResponse<TaskWithSubtasks> = {
+        data: taskWithSubtasks,
+        message: 'Task with subtasks created successfully',
+      };
+
+      return NextResponse.json(response, { status: HTTP_STATUS.CREATED });
+    } catch (error) {
+      return this.handleError(error, 'Failed to create task with subtasks');
     }
   }
 

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BoardWithColumns } from '@/types';
+import { useMemo } from 'react';
 
 export function useSelectedBoard() {
   const queryClient = useQueryClient();
@@ -43,6 +44,43 @@ export function useSelectedBoard() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Ensure selectedBoardId is always a string
+  const selectedBoardId: string = useMemo(() => {
+    return selectedBoardQuery.data || '';
+  }, [selectedBoardQuery.data]);
+
+  // Find the todo column ID from the selected board
+  const todoColumnId: string = useMemo(() => {
+    const board = selectedBoardData.data;
+    if (!board?.columns || board.columns.length === 0) {
+      return '';
+    }
+
+    // Try to find todo column by name (case insensitive)
+    const todoColumn = board.columns.find((column) => {
+      const columnName = column.name.toLowerCase().trim();
+      return (
+        columnName === 'todo' ||
+        columnName === 'to do' ||
+        columnName === 'to-do' ||
+        columnName === 'backlog' ||
+        columnName.includes('todo') ||
+        columnName.includes('to do')
+      );
+    });
+
+    // If found by name, return its ID
+    if (todoColumn) {
+      return todoColumn.id;
+    }
+
+    // Fallback: return the first column (usually the leftmost/starting column)
+    const sortedColumns = [...board.columns].sort(
+      (a, b) => a.position - b.position,
+    );
+    return sortedColumns[0]?.id || '';
+  }, [selectedBoardData.data]);
+
   const setSelectedBoard = (boardId: string | null) => {
     queryClient.setQueryData(['selectedBoard'], boardId);
 
@@ -60,8 +98,9 @@ export function useSelectedBoard() {
   };
 
   return {
-    selectedBoardId: selectedBoardQuery.data,
+    selectedBoardId, // ← Now always returns a string (empty string if none selected)
     selectedBoard: selectedBoardData.data,
+    todoColumnId, // ← Always returns a string (empty string if no todo column)
     isLoadingSelection:
       selectedBoardQuery.isLoading || selectedBoardData.isLoading,
     setSelectedBoard,
