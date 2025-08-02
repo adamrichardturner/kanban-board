@@ -7,11 +7,12 @@ import {
   UpdateBoardRequest,
 } from '@/types/kanban';
 import { useSelectedBoard } from './useSelectedBoard';
+import { toast } from 'sonner';
 
 export function useBoards() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { setSelectedBoard, selectedBoardId } = useSelectedBoard(); // Make sure selectedBoardId is available
+  const { setSelectedBoard, selectedBoardId } = useSelectedBoard();
 
   const getUserBoards = async (): Promise<BoardResponse[]> => {
     const res = await fetch('/api/boards');
@@ -73,6 +74,7 @@ export function useBoards() {
       // Set as selected board and navigate
       setSelectedBoard(newBoard.id);
       router.push(`/boards/${newBoard.id}`);
+      toast(`${newBoard.name} created successfully!`);
     },
     onError: (error) => {
       console.error('Create board failed:', error);
@@ -113,6 +115,7 @@ export function useBoards() {
           return old ? { ...old, ...updatedBoard } : undefined;
         },
       );
+      toast(`${updatedBoard.name} updated successfully!`);
     },
     onError: (error) => {
       console.error('Update board failed:', error);
@@ -183,11 +186,13 @@ export function useBoards() {
             console.log('Navigating to first available board:', firstBoard.id);
             setSelectedBoard(firstBoard.id);
             router.push(`/boards/${firstBoard.id}`);
+            toast(`Board deleted`);
           } else {
             // No boards left, navigate to boards index
             console.log('No boards remaining, navigating to /boards');
             setSelectedBoard(null);
             router.push('/boards');
+            toast(`Board deleted`);
           }
         }
 
@@ -197,6 +202,7 @@ export function useBoards() {
         // Fallback navigation
         setSelectedBoard(null);
         router.push('/boards');
+        toast(`Failed to delete board`);
       }
     },
     onError: (error, deletedBoardId, context) => {

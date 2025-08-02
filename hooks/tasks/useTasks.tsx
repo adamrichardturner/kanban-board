@@ -11,6 +11,7 @@ import {
   UpdateSubtaskRequest,
   ReorderRequest,
 } from '@/types/kanban';
+import { toast } from 'sonner';
 
 export function useTasks() {
   const queryClient = useQueryClient();
@@ -107,8 +108,10 @@ export function useTasks() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['boards', newTask.boardId] });
+      toast(`Task created successfully!`);
     },
     onError: (error) => {
+      toast(`Failed to create task`);
       console.error('Create task failed:', error);
     },
   });
@@ -155,8 +158,10 @@ export function useTasks() {
       queryClient.invalidateQueries({
         queryKey: ['boards', newTaskWithSubtasks.boardId],
       });
+      toast(`Task created successfully!`);
     },
     onError: (error) => {
+      toast(`Failed to create task with subtasks`);
       console.error('Create task with subtasks failed:', error);
     },
   });
@@ -214,6 +219,8 @@ export function useTasks() {
       queryClient.invalidateQueries({
         queryKey: ['boards', updatedTask.boardId],
       });
+
+      toast(`Task updated successfully!`);
     },
     onError: (error) => {
       console.error('Update task failed:', error);
@@ -256,6 +263,7 @@ export function useTasks() {
 
       queryClient.removeQueries({ queryKey: ['tasks', taskId] });
       queryClient.removeQueries({ queryKey: ['subtasks', 'task', taskId] });
+      toast(`Task deleted`);
     },
     onError: (error) => {
       console.error('Delete task failed:', error);
@@ -419,8 +427,10 @@ export function useTasks() {
             : undefined;
         },
       );
+      toast(`Subtask created successfully!`);
     },
     onError: (error) => {
+      toast(`Failed to create subtask`);
       console.error('Create subtask failed:', error);
     },
   });
@@ -468,6 +478,7 @@ export function useTasks() {
             : undefined;
         },
       );
+      toast(`Subtask updated successfully!`);
     },
     onError: (error) => {
       console.error('Update subtask failed:', error);
@@ -526,6 +537,7 @@ export function useTasks() {
               : undefined;
           },
         );
+        toast(`Subtask deleted`);
       }
     },
     onError: (error) => {

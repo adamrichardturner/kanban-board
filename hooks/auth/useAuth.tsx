@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { AuthUser, AuthResponse, ApiResponse, BoardResponse } from '@/types';
+import { toast } from 'sonner';
 
 async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch('/api/auth/me');
@@ -84,8 +85,10 @@ export function useAuth() {
       // Get the route (it will be cached from the invalidation above)
       const route = await fetchPostLoginRoute();
       router.push(route);
+      toast(`${user.fullName} logged in successfully!`);
     },
     onError: (err) => {
+      toast(`Demo login failed`);
       console.error('Demo login failed:', err);
     },
   });
