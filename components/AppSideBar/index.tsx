@@ -9,7 +9,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import Image from 'next/image';
