@@ -137,7 +137,7 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
                 onClick={handleAddColumn}
                 className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7]'
               >
-                <Plus className='mr-2 h-4 w-4' />+ Add New Column
+                + Add New Column
               </Button>
             </div>
           </div>

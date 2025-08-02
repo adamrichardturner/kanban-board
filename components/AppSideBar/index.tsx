@@ -88,7 +88,7 @@ export function AppSidebar() {
                     trigger={
                       <SidebarMenuButton
                         asChild
-                        className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:text-[#635FC7] focus:text-[#635FC7] active:bg-[#635FC7] active:text-white'
+                        className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:text-[#635FC7] focus:text-[#635FC7] active:text-[#635FC7]'
                       >
                         <div className='flex w-full items-center gap-4'>
                           <Image
