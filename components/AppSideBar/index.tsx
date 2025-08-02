@@ -8,28 +8,20 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
+import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import LoadingSpinner from '@/public/spinner.svg';
-import { Reorder } from 'framer-motion';
-import { BoardResponse } from '@/types';
 
 export function AppSidebar() {
-  const { boards, reorderBoards, isLoading } = useBoards();
-
-  const handleReorder = (newOrder: BoardResponse[]) => {
-    const reorderData = {
-      items: newOrder.map((board, index) => ({
-        id: board.id,
-        position: index,
-      })),
-    };
-    reorderBoards(reorderData);
-  };
+  const { boards, isLoading } = useBoards();
+  const { selectedBoardId } = useSelectedBoard();
 
   return (
     <Sidebar
@@ -37,7 +29,7 @@ export function AppSidebar() {
       variant='inset'
       collapsible='offcanvas'
     >
-      <SidebarHeader>
+      <SidebarHeader className='pb-[54px]'>
         <div className='p-4'>
           <Image
             src={KanBanLogo}
@@ -52,40 +44,58 @@ export function AppSidebar() {
       <SidebarContent>
         {!isLoading ? (
           <SidebarGroup>
-            <SidebarGroupLabel className='semibold text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
+            <SidebarGroupLabel className='semibold pb-[20px] pl-[32px] text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
               All Boards ({boards.length})
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <Reorder.Group
-                values={boards}
-                onReorder={handleReorder}
-                className='flex min-h-0 w-full flex-col text-sm group-has-[[data-sidebar=menu-action]]/sidebar-group:space-y-1'
-                as='ul'
-              >
+              <SidebarMenu>
                 {boards.map((board) => (
-                  <Reorder.Item
-                    key={board.id}
-                    value={board}
-                    className='cursor-grab active:cursor-grabbing'
-                    as='li'
-                  >
-                    <SidebarMenuButton asChild>
+                  <SidebarMenuItem key={board.id}>
+                    <SidebarMenuButton
+                      asChild
+                      className={`${
+                        selectedBoardId === board.id
+                          ? 'min-h-[48px] max-w-[276px] rounded-l-none rounded-r-full bg-[#635FC7] pl-[32px] font-semibold text-white hover:bg-[#635FC7] hover:text-white focus:bg-[#635FC7] focus:text-white active:bg-[#635FC7] active:text-white'
+                          : 'min-h-[48px] pl-[32px] font-semibold text-[#828FA3] focus-within:text-[#828FA3] hover:text-[#828FA3] focus:text-[#828FA3] active:text-[#828FA3]'
+                      }`}
+                    >
                       <Link
                         href={`/boards/${board.id}`}
-                        className='flex w-full items-center gap-2'
+                        className='flex w-full items-center gap-4 focus:text-inherit active:text-inherit'
                       >
                         <Image
                           src='/boards/board-icon-regular.svg'
                           alt='Board Icon'
                           width={16}
                           height={16}
+                          className={`${
+                            selectedBoardId === board.id
+                              ? 'brightness-0 invert'
+                              : ''
+                          }`}
                         />
                         <span className='truncate'>{board.name}</span>
                       </Link>
                     </SidebarMenuButton>
-                  </Reorder.Item>
+                  </SidebarMenuItem>
                 ))}
-              </Reorder.Group>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:text-[#635FC7] focus:text-[#635FC7] active:bg-[#635FC7] active:text-white'
+                  >
+                    <div className='flex w-full items-center gap-4'>
+                      <Image
+                        src='/boards/board-icon-create.svg'
+                        alt='Board Icon'
+                        width={16}
+                        height={16}
+                      />
+                      <span className='truncate'>+ Create New Board</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : (
@@ -93,11 +103,6 @@ export function AppSidebar() {
             <Image alt='Loading' src={LoadingSpinner} height={20} width={20} />
           </div>
         )}
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Boards</SidebarGroupLabel>
-          <SidebarGroupContent>{/* TODO Nav */}</SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
