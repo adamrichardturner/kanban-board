@@ -6,10 +6,12 @@ import {
   ReorderRequest,
   UpdateBoardRequest,
 } from '@/types/kanban';
+import { useSelectedBoard } from './useSelectedBoard';
 
 export function useBoards() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { setSelectedBoard } = useSelectedBoard();
 
   const getUserBoards = async (): Promise<BoardResponse[]> => {
     const res = await fetch('/api/boards');
@@ -68,6 +70,8 @@ export function useBoards() {
         return old ? [...old, newBoard] : [newBoard];
       });
 
+      // Set as selected board and navigate
+      setSelectedBoard(newBoard.id);
       router.push(`/boards/${newBoard.id}`);
     },
     onError: (error) => {
@@ -132,7 +136,26 @@ export function useBoards() {
 
       queryClient.removeQueries({ queryKey: ['boards', boardId] });
 
-      router.push('/boards');
+      // Clear selection if deleted board was selected
+      const currentSelection = queryClient.getQueryData<string>([
+        'selectedBoard',
+      ]);
+      if (currentSelection === boardId) {
+        // Select the first available board or clear selection
+        const boards = queryClient.getQueryData<BoardResponse[]>(['boards']);
+        const remainingBoards = boards?.filter((board) => board.id !== boardId);
+
+        if (remainingBoards && remainingBoards.length > 0) {
+          const firstBoard = remainingBoards.sort(
+            (a, b) => a.position - b.position,
+          )[0];
+          setSelectedBoard(firstBoard.id);
+          router.push(`/boards/${firstBoard.id}`);
+        } else {
+          setSelectedBoard(null);
+          router.push('/boards');
+        }
+      }
     },
     onError: (error) => {
       console.error('Delete board failed:', error);
