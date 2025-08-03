@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,20 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MoreHorizontal } from 'lucide-react';
+import { EllipsisVerticalIcon } from 'lucide-react';
 import { TaskWithSubtasks } from '@/types';
 import { UpdateSubtaskRequest } from '@/types/kanban';
 import { useTasks } from '@/hooks/tasks/useTasks';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { EditTaskDialog } from '../Task/EditTaskDialog';
 
-interface TaskDetailsProps {
+interface TaskDetailsDialogProps {
   task: TaskWithSubtasks;
   trigger?: React.ReactNode;
 }
 
-export function TaskDetails({ task, trigger }: TaskDetailsProps) {
+export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(task.columnId);
 
@@ -60,25 +61,30 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
           <div className='cursor-pointer'>{/* Default trigger */}</div>
         )}
       </DialogTrigger>
-      <DialogContent className='max-h-[90vh] max-w-md overflow-y-auto sm:max-w-lg'>
-        <DialogHeader className='flex flex-row items-start justify-between space-y-0 pb-4'>
-          <DialogTitle className='pr-8 text-lg font-bold text-[#000112]'>
+      <DialogContent className='max-h-[90vh] max-w-[480px] overflow-y-auto'>
+        <DialogHeader className='flex flex-row items-start justify-between space-y-0 pb-0'>
+          <DialogTitle className='pr-8 text-[18px] leading-[23px] font-bold text-[#000112] dark:text-white'>
             {task.title}
           </DialogTitle>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='h-6 w-6 p-0 text-[#828FA3]'
-          >
-            <MoreHorizontal size={16} />
-          </Button>
+          <EditTaskDialog
+            task={task}
+            trigger={
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-6 w-6 p-0 text-[#828FA3] hover:text-[#635FC7]'
+              >
+                <EllipsisVerticalIcon className='h-4 w-4' />
+              </Button>
+            }
+          />
         </DialogHeader>
 
         <div className='space-y-6'>
           {/* Description */}
           {task.description && (
             <div className='space-y-2'>
-              <p className='text-sm leading-relaxed text-[#828FA3]'>
+              <p className='text-[13px] leading-[23px] text-[#828FA3]'>
                 {task.description}
               </p>
             </div>
@@ -87,27 +93,31 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
           {/* Subtasks */}
           {task.subtasks && task.subtasks.length > 0 && (
             <div className='space-y-4'>
-              <Label className='text-sm font-bold text-[#828FA3]'>
+              <Label className='text-[12px] leading-[15px] font-bold tracking-[0.5px] text-[#828FA3]'>
                 Subtasks ({completedSubtasks} of {task.subtasks.length})
               </Label>
               <div className='space-y-2'>
                 {task.subtasks.map((subtask) => (
                   <div
                     key={subtask.id}
-                    className='flex items-center gap-3 rounded-md bg-[#F4F7FD] p-3 transition-colors hover:bg-[#635FC7]/25'
+                    className='flex cursor-pointer items-center gap-4 rounded-[4px] bg-[#F4F7FD] p-3 transition-colors hover:bg-[#635FC7]/10 dark:bg-[#20212C]'
+                    onClick={() =>
+                      handleSubtaskToggle(subtask.id, subtask.status)
+                    }
                   >
                     <Checkbox
                       checked={subtask.status}
-                      onCheckedChange={() =>
-                        handleSubtaskToggle(subtask.id, subtask.status)
-                      }
-                      className='border-[#828FA3]/25 data-[state=checked]:border-[#635FC7] data-[state=checked]:bg-[#635FC7]'
+                      onCheckedChange={(checked) => {
+                        // Prevent double-triggering when clicking directly on checkbox
+                        return;
+                      }}
+                      className='pointer-events-none h-4 w-4 border-[#828FA3]/25 data-[state=checked]:border-[#635FC7] data-[state=checked]:bg-[#635FC7]'
                     />
                     <span
-                      className={`flex-1 text-sm font-bold ${
+                      className={`flex-1 text-[12px] leading-[15px] font-bold ${
                         subtask.status
-                          ? 'text-[#828FA3] line-through'
-                          : 'text-[#000112]'
+                          ? 'text-[#828FA3]/90 line-through'
+                          : 'text-[#000112] dark:text-white'
                       }`}
                     >
                       {subtask.title}
@@ -120,7 +130,7 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
 
           {/* Current Status */}
           <div className='space-y-2'>
-            <Label className='text-sm font-bold text-[#828FA3]'>
+            <Label className='text-[12px] leading-[15px] font-bold tracking-[0.5px] text-[#828FA3]'>
               Current Status
             </Label>
             {selectedBoard?.columns ? (
@@ -129,12 +139,16 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
                 value={selectedColumnId}
                 onValueChange={handleStatusChange}
               >
-                <SelectTrigger className='w-full'>
+                <SelectTrigger className='h-10 w-full border-[#828FA3]/25 text-[13px] font-medium'>
                   <SelectValue placeholder='Select status' />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedBoard.columns.map((column) => (
-                    <SelectItem key={column.id} value={column.id}>
+                    <SelectItem
+                      key={column.id}
+                      value={column.id}
+                      className='text-[13px]'
+                    >
                       {column.name}
                     </SelectItem>
                   ))}

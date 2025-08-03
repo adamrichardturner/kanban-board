@@ -18,17 +18,25 @@ export default function Page({ params }: PageProps) {
   const { id } = use(params);
   const { data: board, isLoading, error } = useBoard(id);
   const { setSelectedBoard } = useSelectedBoard();
-  const { open: sidebarOpen } = useSidebar();
+  const { open: sidebarOpen, isMobile } = useSidebar();
   const { theme } = useTheme();
 
   // Calculate content width based on sidebar state
-  const scrollAreaWidth = sidebarOpen
-    ? 'calc(100vw - 300px - 3rem)'
-    : 'calc(100vw - 3rem)';
+  const scrollAreaWidth = getScrollAreaWidth(isMobile, sidebarOpen);
 
   useEffect(() => {
     setSelectedBoard(id);
   }, [id, setSelectedBoard]);
+
+  function getScrollAreaWidth(isMobile: boolean, sidebarOpen: boolean) {
+    if (isMobile) {
+      return 'calc(100vw)';
+    }
+    if (sidebarOpen) {
+      return 'calc(100vw - 300px - 3rem)';
+    }
+    return 'calc(100vw - 3rem)';
+  }
 
   if (isLoading) {
     return (
@@ -141,7 +149,7 @@ export default function Page({ params }: PageProps) {
                   </h2>
                 </div>
 
-                <div className='space-y-3'>
+                <div className='space-y-6'>
                   {column.tasks.map((task) => (
                     <Task key={task.id} task={task} />
                   ))}

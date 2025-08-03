@@ -79,7 +79,7 @@ export function taskToResponse(
   return {
     id: task.id,
     boardId: task.board_id,
-    columnId: task.column_id,
+    columnId: task.columnId,
     title: task.title,
     description: task.description,
     status: task.status,

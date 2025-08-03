@@ -6,12 +6,11 @@ import {
   UpdateSubtaskRequest,
   ReorderRequest,
   Subtask,
-  TaskStatus,
 } from '@/types/kanban';
 
 interface SubtaskUpdateFields {
   title?: string;
-  status?: TaskStatus;
+  status?: boolean;
   position?: number;
 }
 
@@ -58,7 +57,7 @@ export class SubtaskService {
     const subtask = await this.subtaskRepository.create(
       taskId,
       data.title,
-      data.status,
+      data.status || false,
     );
 
     return this.mapSubtaskResponse(subtask);

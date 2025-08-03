@@ -1,5 +1,5 @@
 import { query, queryOne } from '@/lib/db';
-import { Subtask, TaskStatus } from '@/types/kanban';
+import { Subtask } from '@/types/kanban';
 
 export class SubtaskRepository {
   async findByTaskId(taskId: string): Promise<Subtask[]> {
@@ -24,7 +24,7 @@ export class SubtaskRepository {
   async create(
     taskId: string,
     title: string,
-    status: TaskStatus = 'todo',
+    status: boolean,
   ): Promise<Subtask> {
     // Get the next position within the task
     const positionSql = `
@@ -62,7 +62,7 @@ export class SubtaskRepository {
     id: string,
     updates: {
       title?: string;
-      status?: TaskStatus;
+      status?: boolean;
       position?: number;
     },
   ): Promise<Subtask | null> {

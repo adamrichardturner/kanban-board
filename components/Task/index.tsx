@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { TaskWithSubtasks } from '@/types';
-import { TaskDetails } from '../TaskDetails';
+import { TaskDetailsDialog } from '../TaskDetailsDialog';
 
 export function Task({ task }: { task: TaskWithSubtasks }) {
   return (
-    <TaskDetails
+    <TaskDetailsDialog
       task={task}
       trigger={
         <Card

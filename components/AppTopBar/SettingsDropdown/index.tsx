@@ -110,8 +110,9 @@ export function SettingsDropdown({ board }: SettingsDropdownProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Board</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the "{board?.name}" board? This
-              action cannot be undone and will remove all columns and tasks.
+              Are you sure you want to delete the &quot;{board?.name}&quot;
+              board? This action cannot be undone and will remove all columns
+              and tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
