@@ -30,7 +30,7 @@ export function AppSidebar() {
       variant='inset'
       collapsible='offcanvas'
     >
-      <SidebarHeader className='pb-[54px]'>
+      <SidebarHeader className='pb-[32px]'>
         <div className='p-4'>
           <Link href='/boards' className='flex items-center gap-2'>
             <Image

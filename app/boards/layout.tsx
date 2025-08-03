@@ -9,13 +9,10 @@ import {
 import { useAuth, usePostLoginRoute } from '@/hooks/auth/useAuth';
 import { AuthRedirect } from '@/components/AuthRedirect';
 import Image from 'next/image';
-import { useBoard } from '@/hooks/boards/useBoards';
-import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLoading: routeLoading } = usePostLoginRoute();
-  const { isLoadingSelection: boardLoading } = useSelectedBoard();
 
   if (authLoading || (isAuthenticated && routeLoading)) {
     return (

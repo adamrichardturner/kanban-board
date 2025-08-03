@@ -64,7 +64,7 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
     if (open && task) {
       setTitle(task.title);
       setDescription(task.description || '');
-      setSelectedColumnId(task.column_id);
+      setSelectedColumnId(task.columnId);
 
       // Convert existing subtasks to editable format
       const editableSubtasks: EditableSubtask[] = task.subtasks.map(
@@ -111,7 +111,7 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
       title: title.trim(),
       description: description.trim() || undefined,
       columnId:
-        selectedColumnId !== task.column_id ? selectedColumnId : undefined,
+        selectedColumnId !== task.columnId ? selectedColumnId : undefined,
     };
 
     updateTask(task.id, taskUpdateData);

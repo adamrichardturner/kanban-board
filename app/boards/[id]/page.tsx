@@ -109,7 +109,7 @@ export default function Page({ params }: PageProps) {
         animation: 'fadeIn 0.3s ease-in-out',
       }}
     >
-      <div className='flex h-screen flex-col'>
+      <div className='flex h-screen flex-col overflow-hidden'>
         <AppTopBar name={board.name} />
         <div className='flex-1 overflow-hidden p-6'>
           <ScrollArea className='h-full' style={{ width: scrollAreaWidth }}>
@@ -147,7 +147,7 @@ export default function Page({ params }: PageProps) {
               ))}
 
               {/* New Column Button */}
-              <div className='w-80 flex-shrink-0'>
+              <div className='mt-10 w-80 flex-shrink-0'>
                 <div
                   className='flex h-full min-h-96 cursor-pointer items-center justify-center transition-opacity hover:opacity-80'
                   style={{
@@ -162,7 +162,10 @@ export default function Page({ params }: PageProps) {
                 </div>
               </div>
             </div>
-            <ScrollBar orientation='horizontal' className='h-4' />
+            <ScrollBar
+              orientation='horizontal'
+              className='h-4 [&>div]:bg-[#4a4a4a] [&>div]:hover:bg-[#3a3a3a]'
+            />
           </ScrollArea>
         </div>
       </div>

@@ -43,7 +43,7 @@ export interface Column {
 export interface Task {
   id: string;
   board_id: string;
-  column_id: string;
+  columnId: string;
   title: string;
   description: string | null;
   status: TaskStatus;

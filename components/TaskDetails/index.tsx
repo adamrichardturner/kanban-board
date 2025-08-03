@@ -29,17 +29,10 @@ interface TaskDetailsProps {
 
 export function TaskDetails({ task, trigger }: TaskDetailsProps) {
   const [open, setOpen] = useState(false);
-  const [selectedColumnId, setSelectedColumnId] = useState(task.column_id);
+  const [selectedColumnId, setSelectedColumnId] = useState(task.columnId);
 
   const { selectedBoard } = useSelectedBoard();
   const { updateTask, updateSubtask } = useTasks();
-
-  // Initialize form data when dialog opens or task changes
-  useEffect(() => {
-    if (task) {
-      setSelectedColumnId(task.column_id);
-    }
-  }, [task]);
 
   const handleSubtaskToggle = (subtaskId: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
@@ -50,7 +43,7 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
   };
 
   const handleStatusChange = (newColumnId: string) => {
-    if (newColumnId !== task.column_id) {
+    if (newColumnId !== task.columnId) {
       updateTask(task.id, { columnId: newColumnId });
       setSelectedColumnId(newColumnId);
     }
@@ -130,18 +123,28 @@ export function TaskDetails({ task, trigger }: TaskDetailsProps) {
             <Label className='text-sm font-bold text-[#828FA3]'>
               Current Status
             </Label>
-            <Select value={selectedColumnId} onValueChange={handleStatusChange}>
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select status' />
-              </SelectTrigger>
-              <SelectContent>
-                {selectedBoard?.columns?.map((column) => (
-                  <SelectItem key={column.id} value={column.id}>
-                    {column.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {selectedBoard?.columns ? (
+              <Select
+                key={`${task.id}-${task.columnId}`}
+                value={selectedColumnId}
+                onValueChange={handleStatusChange}
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select status' />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedBoard.columns.map((column) => (
+                    <SelectItem key={column.id} value={column.id}>
+                      {column.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className='border-input bg-background ring-offset-background h-10 w-full rounded-md border px-3 py-2 text-sm'>
+                Loading columns...
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
