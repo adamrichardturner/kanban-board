@@ -1,13 +1,13 @@
 import { CreateTaskDialog } from './CreateTaskDialog';
 import Image from 'next/image';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
+import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import { useSidebar } from '../ui/sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
-import { Edit, EllipsisVertical } from 'lucide-react';
-import { EditBoardDialog } from './EditBoardDialog';
 import { SettingsDropdown } from './SettingsDropdown';
+import { useTheme } from 'next-themes';
 
 interface AppTopBarProps {
   name: string;
@@ -17,10 +17,11 @@ export function AppTopBar({ name }: AppTopBarProps) {
   const { open } = useSidebar();
   const { selectedBoard, selectedBoardId, todoColumnId, isLoadingSelection } =
     useSelectedBoard();
+  const { theme } = useTheme();
 
   return (
     <div
-      className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5'
+      className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5 dark:bg-[#2B2C37]'
       style={{
         boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
       }}
@@ -43,11 +44,10 @@ export function AppTopBar({ name }: AppTopBarProps) {
             >
               <Link href='/boards' className='flex items-center gap-2'>
                 <Image
-                  src={KanBanLogo}
+                  src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
                   alt='Kanban Board Logo'
                   height={26}
                   style={{ width: 'auto', height: '26px' }}
-                  className='dark:invert'
                   priority
                 />
               </Link>
@@ -63,7 +63,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
             duration: 0.4,
             ease: [0.25, 0.46, 0.45, 0.94], // Custom easing for smooth feel
           }}
-          className='pt-1 text-[24px] font-bold text-[#000112]'
+          className='pt-1 text-[24px] font-bold text-[#000112] dark:text-white'
         >
           {name}
         </motion.h1>

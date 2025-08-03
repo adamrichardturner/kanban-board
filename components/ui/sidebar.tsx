@@ -171,7 +171,7 @@ function Sidebar({
       <div
         data-slot='sidebar'
         className={cn(
-          'bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col',
+          'dark:bg-dark-grey text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col bg-white',
           className,
         )}
         {...props}
@@ -272,7 +272,7 @@ function SidebarTrigger({
         'transition-[transform,opacity,width,height] duration-200',
         // When sidebar is closed (show button prominently)
         !open &&
-          'fixed bottom-[38px] left-[0px] h-[48px] w-[56px] justify-center rounded-r-full bg-[#635FC7] hover:bg-[#A8A4FF] active:bg-[#635FC7]/80',
+          'fixed bottom-[38px] left-[0px] h-[48px] w-[56px] justify-center rounded-r-full bg-[#635FC7] hover:bg-[#635FC7]/90 active:bg-[#635FC7]/80 dark:hover:bg-[#635FC7]/90',
         // When sidebar is open (subtle button in sidebar)
         open &&
           'fixed bottom-[38px] left-4 min-w-fit rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',

@@ -145,7 +145,7 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
                 variant='ghost'
                 onClick={handleAddColumn}
                 disabled={columns.length >= 6}
-                className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
+                className='mt-1 w-full rounded-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-[#635FC7] dark:hover:bg-white/90'
               >
                 + Add New Column {columns.length >= 6 && '(Max 6)'}
               </Button>

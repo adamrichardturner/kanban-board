@@ -8,6 +8,7 @@ import { Task } from '@/components/Task';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { CreateColumnDialog } from '@/components/CreateColumnDialog';
+import { useTheme } from 'next-themes';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -18,6 +19,7 @@ export default function Page({ params }: PageProps) {
   const { data: board, isLoading, error } = useBoard(id);
   const { setSelectedBoard } = useSelectedBoard();
   const { open: sidebarOpen } = useSidebar();
+  const { theme } = useTheme();
 
   // Calculate content width based on sidebar state
   const scrollAreaWidth = sidebarOpen
@@ -33,7 +35,7 @@ export default function Page({ params }: PageProps) {
       <div className='animate-pulse'>
         {/* Skeleton AppTopBar */}
         <div
-          className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5'
+          className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5 dark:bg-[#20212C]'
           style={{
             boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
           }}
@@ -90,7 +92,7 @@ export default function Page({ params }: PageProps) {
 
   if (error) {
     return (
-      <div className='flex h-64 items-center justify-center'>
+      <div className='flex h-64 items-center justify-center bg-white dark:bg-[#20212C]'>
         <div className='text-red-500'>Error: {error.message}</div>
       </div>
     );
@@ -98,14 +100,14 @@ export default function Page({ params }: PageProps) {
 
   if (!board) {
     return (
-      <div className='flex h-64 items-center justify-center'>
+      <div className='flex h-64 items-center justify-center bg-white dark:bg-[#20212C]'>
         <div>Board not found</div>
       </div>
     );
   }
 
   return (
-    <div className='flex h-screen flex-col overflow-hidden'>
+    <div className='flex h-screen flex-col overflow-hidden bg-white dark:bg-[#20212C]'>
       <AppTopBar name={board.name} />
       <div
         className='flex-1 overflow-hidden p-6'
@@ -157,7 +159,9 @@ export default function Page({ params }: PageProps) {
                       style={{
                         borderRadius: '6px',
                         background:
-                          'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
+                          theme === 'dark'
+                            ? 'linear-gradient(180deg, rgba(43, 44, 55, 0.25) 0%, rgba(43, 44, 55, 0.13) 100%)'
+                            : 'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
                       }}
                     >
                       <span className='text-2xl font-bold text-[#828FA3]'>

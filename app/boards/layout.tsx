@@ -37,7 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SidebarProvider>
           <SidebarTrigger />
           <AppSidebar />
-          <SidebarInset className='min-h-screen w-full bg-[#F4F7FD]'>
+          <SidebarInset className='min-h-screen w-full bg-[#F4F7FD] dark:bg-[#20212C]'>
             {children}
           </SidebarInset>
         </SidebarProvider>

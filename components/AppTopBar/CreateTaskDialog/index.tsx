@@ -127,7 +127,7 @@ export function CreateTaskDialog({
         {trigger || (
           <Button
             variant='outline'
-            className='h-[48px] w-[164px] cursor-pointer rounded-full bg-[#635FC7] text-white transition-colors hover:bg-[#635FC7]/90 hover:text-white'
+            className='h-[48px] w-[164px] cursor-pointer rounded-full bg-[#635FC7] text-white transition-colors hover:bg-[#635FC7]/90 hover:text-white dark:bg-[#635FC7] dark:text-white dark:hover:bg-[#635FC7]/90'
           >
             + Add New Task
           </Button>
@@ -141,7 +141,7 @@ export function CreateTaskDialog({
         <div className='space-y-6 py-4'>
           {/* Title */}
           <div className='space-y-2'>
-            <Label htmlFor='title' className='text-[#828FA3]'>
+            <Label htmlFor='title' className='text-[#828FA3] dark:text-white'>
               Title
             </Label>
             <Input
@@ -155,7 +155,10 @@ export function CreateTaskDialog({
 
           {/* Description */}
           <div className='space-y-2'>
-            <Label htmlFor='description' className='text-[#828FA3]'>
+            <Label
+              htmlFor='description'
+              className='text-[#828FA3] dark:text-white'
+            >
               Description
             </Label>
             <Textarea
@@ -169,7 +172,7 @@ export function CreateTaskDialog({
 
           {/* Subtasks */}
           <div className='space-y-2'>
-            <Label className='text-[#828FA3]'>Subtasks</Label>
+            <Label className='text-[#828FA3] dark:text-white'>Subtasks</Label>
             <div className='space-y-2'>
               {subtasks.map((subtask, index) => (
                 <div key={index} className='flex items-center gap-2'>
@@ -189,7 +192,7 @@ export function CreateTaskDialog({
                     size='sm'
                     onClick={() => handleRemoveSubtask(index)}
                     disabled={subtasks.length === 1}
-                    className='h-10 w-10 p-0 hover:bg-gray-100'
+                    className='h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-white/90'
                   >
                     <X className='h-4 w-4' />
                   </Button>
@@ -201,7 +204,7 @@ export function CreateTaskDialog({
                 variant='ghost'
                 onClick={handleAddSubtask}
                 disabled={subtasks.length >= 6}
-                className='mt-1 w-full cursor-pointer rounded-full bg-[#635FC7]/10 text-[#635FC7] hover:bg-[#635FC7]/20 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
+                className='mt-1 w-full cursor-pointer rounded-full bg-[#635FC7]/10 py-4 text-[#635FC7] hover:bg-[#635FC7]/20 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:hover:bg-white/90'
               >
                 <Plus className='mr-2 h-4 w-4' />
                 Add New Subtask {subtasks.length >= 6 && '(Max 6)'}
@@ -211,7 +214,7 @@ export function CreateTaskDialog({
 
           {/* Column Selection */}
           <div className='space-y-2'>
-            <Label className='text-[#828FA3]'>Status</Label>
+            <Label className='text-[#828FA3] dark:text-white'>Status</Label>
             <Select
               value={selectedColumnId}
               onValueChange={setSelectedColumnId}
