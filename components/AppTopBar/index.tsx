@@ -56,14 +56,14 @@ export function AppTopBar({ name }: AppTopBarProps) {
         </AnimatePresence>
 
         <motion.h1
-          className='pt-1 text-[24px] font-bold text-[#000112]'
+          key={name} // Key ensures animation triggers on name change
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{
-            type: 'spring',
-            stiffness: 120,
-            damping: 25,
-            mass: 1,
-            duration: 0.15,
+            duration: 0.4,
+            ease: [0.25, 0.46, 0.45, 0.94], // Custom easing for smooth feel
           }}
+          className='pt-1 text-[24px] font-bold text-[#000112]'
         >
           {name}
         </motion.h1>

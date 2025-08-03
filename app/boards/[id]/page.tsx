@@ -38,7 +38,7 @@ export default function Page({ params }: PageProps) {
             boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
           }}
         >
-          <div className='h-6 w-48 rounded-md bg-gray-200'></div>
+          <div></div> {/* No skeleton for title */}
           <div className='flex items-center gap-4'>
             <div className='h-10 w-32 rounded-md bg-gray-200'></div>
             <div className='h-10 w-28 rounded-md bg-gray-200'></div>
@@ -105,76 +105,75 @@ export default function Page({ params }: PageProps) {
   }
 
   return (
-    <div
-      style={{
-        animation: 'fadeIn 0.3s ease-in-out',
-      }}
-    >
-      <div className='flex h-screen flex-col overflow-hidden'>
-        <AppTopBar name={board.name} />
-        <div className='flex-1 overflow-hidden p-6'>
-          <ScrollArea className='h-full' style={{ width: scrollAreaWidth }}>
-            <div className='flex w-max gap-6 pb-4'>
-              {board.columns.map((column) => (
-                <div key={column.id} className='w-80 flex-shrink-0'>
-                  <div className='mb-6 flex items-center gap-3'>
+    <div className='flex h-screen flex-col overflow-hidden'>
+      <AppTopBar name={board.name} />
+      <div
+        className='flex-1 overflow-hidden p-6'
+        style={{
+          animation: 'fadeIn 0.3s ease-in-out',
+        }}
+      >
+        <ScrollArea className='h-full' style={{ width: scrollAreaWidth }}>
+          <div className='flex w-max gap-6 pb-4'>
+            {board.columns.map((column) => (
+              <div key={column.id} className='w-80 flex-shrink-0'>
+                <div className='mb-6 flex items-center gap-3'>
+                  <div
+                    className='h-4 w-4 rounded-full'
+                    style={{ backgroundColor: column.color }}
+                  />
+                  <h2
+                    className='uppercase'
+                    style={{
+                      color: 'var(--Medium-Grey, #828FA3)',
+                      fontFeatureSettings: '"liga" off, "clig" off',
+                      fontFamily: '"Plus Jakarta Sans"',
+                      fontSize: '12px',
+                      fontStyle: 'normal',
+                      fontWeight: 600,
+                      lineHeight: 'normal',
+                      letterSpacing: '2.4px',
+                    }}
+                  >
+                    {column.name} ({column.tasks.length})
+                  </h2>
+                </div>
+
+                <div className='space-y-3'>
+                  {column.tasks.map((task) => (
+                    <Task key={task.id} task={task} />
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* New Column Button */}
+            {board.columns.length < 6 && (
+              <div className='mt-10 w-80 flex-shrink-0'>
+                <CreateColumnDialog
+                  trigger={
                     <div
-                      className='h-4 w-4 rounded-full'
-                      style={{ backgroundColor: column.color }}
-                    />
-                    <h2
-                      className='uppercase'
+                      className='flex h-full min-h-96 cursor-pointer items-center justify-center transition-opacity hover:opacity-80'
                       style={{
-                        color: 'var(--Medium-Grey, #828FA3)',
-                        fontFeatureSettings: '"liga" off, "clig" off',
-                        fontFamily: '"Plus Jakarta Sans"',
-                        fontSize: '12px',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        lineHeight: 'normal',
-                        letterSpacing: '2.4px',
+                        borderRadius: '6px',
+                        background:
+                          'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
                       }}
                     >
-                      {column.name} ({column.tasks.length})
-                    </h2>
-                  </div>
-
-                  <div className='space-y-3'>
-                    {column.tasks.map((task) => (
-                      <Task key={task.id} task={task} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* New Column Button */}
-              {board.columns.length < 6 && (
-                <div className='mt-10 w-80 flex-shrink-0'>
-                  <CreateColumnDialog
-                    trigger={
-                      <div
-                        className='flex h-full min-h-96 cursor-pointer items-center justify-center transition-opacity hover:opacity-80'
-                        style={{
-                          borderRadius: '6px',
-                          background:
-                            'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
-                        }}
-                      >
-                        <span className='text-2xl font-bold text-[#828FA3]'>
-                          + New Column
-                        </span>
-                      </div>
-                    }
-                  />
-                </div>
-              )}
-            </div>
-            <ScrollBar
-              orientation='horizontal'
-              className='h-4 [&>div]:bg-[#4a4a4a] [&>div]:hover:bg-[#3a3a3a]'
-            />
-          </ScrollArea>
-        </div>
+                      <span className='text-2xl font-bold text-[#828FA3]'>
+                        + New Column
+                      </span>
+                    </div>
+                  }
+                />
+              </div>
+            )}
+          </div>
+          <ScrollBar
+            orientation='horizontal'
+            className='h-4 [&>div]:bg-[#4a4a4a] [&>div]:hover:bg-[#3a3a3a]'
+          />
+        </ScrollArea>
       </div>
     </div>
   );
