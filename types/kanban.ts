@@ -88,7 +88,7 @@ export interface Subtask {
   id: string;
   task_id: string;
   title: string;
-  status: TaskStatus;
+  status: boolean;
   position: number;
   created_at: Date;
   updated_at: Date;
@@ -98,7 +98,7 @@ export interface SubtaskResponse {
   id: string;
   taskId: string;
   title: string;
-  status: TaskStatus;
+  status: boolean;
   position: number;
   createdAt: Date;
   updatedAt: Date;
@@ -152,12 +152,12 @@ export interface UpdateTaskRequest {
 
 export interface CreateSubtaskRequest {
   title: string;
-  status?: TaskStatus;
+  status?: boolean;
 }
 
 export interface UpdateSubtaskRequest {
   title?: string;
-  status?: TaskStatus;
+  status?: boolean;
   position?: number;
 }
 

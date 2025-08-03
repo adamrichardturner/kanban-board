@@ -50,7 +50,9 @@ export function useTasks() {
       queryKey: ['tasks', 'column', columnId],
       queryFn: () => getColumnTasks(columnId),
       enabled: !!columnId,
-      staleTime: 1000 * 60 * 1,
+      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
+      refetchOnMount: 'always', // Always refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when window gains focus
     });
   };
 
@@ -59,7 +61,9 @@ export function useTasks() {
       queryKey: ['tasks', taskId],
       queryFn: () => getTask(taskId),
       enabled: !!taskId,
-      staleTime: 1000 * 60 * 1,
+      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
+      refetchOnMount: 'always', // Always refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when window gains focus
     });
   };
 
@@ -68,7 +72,9 @@ export function useTasks() {
       queryKey: ['subtasks', 'task', taskId],
       queryFn: () => getTaskSubtasks(taskId),
       enabled: !!taskId,
-      staleTime: 1000 * 60 * 1,
+      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
+      refetchOnMount: 'always', // Always refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when window gains focus
     });
   };
 
@@ -179,7 +185,10 @@ export function useTasks() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to update task');
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage =
+          errorData.error || errorData.message || 'Failed to update task';
+        throw new Error(errorMessage);
       }
 
       const response: ApiResponse<TaskResponse> = await res.json();
@@ -224,6 +233,16 @@ export function useTasks() {
     },
     onError: (error) => {
       console.error('Update task failed:', error);
+
+      // Check if it's a position conflict error
+      if (
+        error.message.includes('duplicate key') ||
+        error.message.includes('position')
+      ) {
+        toast.error('Task position conflict. Please try again.');
+      } else {
+        toast.error('Failed to update task. Please try again.');
+      }
     },
   });
 
@@ -419,6 +438,13 @@ export function useTasks() {
         (old) => (old ? [...old, newSubtask] : [newSubtask]),
       );
 
+      // Get boardId from existing task data
+      const existingTask = queryClient.getQueryData<TaskWithSubtasks>([
+        'tasks',
+        newSubtask.taskId,
+      ]);
+      const boardId = existingTask?.boardId;
+
       queryClient.setQueryData(
         ['tasks', newSubtask.taskId],
         (old: TaskWithSubtasks | undefined) => {
@@ -427,6 +453,24 @@ export function useTasks() {
             : undefined;
         },
       );
+
+      // Invalidate board cache to refresh UI immediately if we have boardId
+      if (boardId) {
+        queryClient.invalidateQueries({
+          queryKey: ['boards', boardId],
+        });
+
+        // Invalidate selected board data cache for immediate refresh
+        queryClient.invalidateQueries({
+          queryKey: ['selectedBoardData', boardId],
+        });
+      }
+
+      // Also invalidate all boards queries as a fallback
+      queryClient.invalidateQueries({
+        queryKey: ['boards'],
+      });
+
       toast.success('Subtask created successfully!');
     },
     onError: (error) => {
@@ -465,6 +509,13 @@ export function useTasks() {
             : [updatedSubtask],
       );
 
+      // Get boardId from existing task data
+      const existingTask = queryClient.getQueryData<TaskWithSubtasks>([
+        'tasks',
+        updatedSubtask.taskId,
+      ]);
+      const boardId = existingTask?.boardId;
+
       queryClient.setQueryData(
         ['tasks', updatedSubtask.taskId],
         (old: TaskWithSubtasks | undefined) => {
@@ -478,6 +529,24 @@ export function useTasks() {
             : undefined;
         },
       );
+
+      // Invalidate board cache to refresh UI immediately if we have boardId
+      if (boardId) {
+        queryClient.invalidateQueries({
+          queryKey: ['boards', boardId],
+        });
+
+        // Invalidate selected board data cache for immediate refresh
+        queryClient.invalidateQueries({
+          queryKey: ['selectedBoardData', boardId],
+        });
+      }
+
+      // Also invalidate all boards queries as a fallback
+      queryClient.invalidateQueries({
+        queryKey: ['boards'],
+      });
+
       toast.success('Subtask updated successfully!');
     },
     onError: (error) => {
@@ -523,6 +592,13 @@ export function useTasks() {
             old ? old.filter((subtask) => subtask.id !== subtaskId) : [],
         );
 
+        // Get boardId from existing task data
+        const existingTask = queryClient.getQueryData<TaskWithSubtasks>([
+          'tasks',
+          context.taskId,
+        ]);
+        const boardId = existingTask?.boardId;
+
         queryClient.setQueryData(
           ['tasks', context.taskId],
           (old: TaskWithSubtasks | undefined) => {
@@ -537,6 +613,24 @@ export function useTasks() {
               : undefined;
           },
         );
+
+        // Invalidate board cache to refresh UI immediately if we have boardId
+        if (boardId) {
+          queryClient.invalidateQueries({
+            queryKey: ['boards', boardId],
+          });
+
+          // Invalidate selected board data cache for immediate refresh
+          queryClient.invalidateQueries({
+            queryKey: ['selectedBoardData', boardId],
+          });
+        }
+
+        // Also invalidate all boards queries as a fallback
+        queryClient.invalidateQueries({
+          queryKey: ['boards'],
+        });
+
         toast.success('Subtask deleted');
       }
     },

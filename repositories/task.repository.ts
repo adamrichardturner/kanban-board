@@ -228,6 +228,16 @@ export class TaskRepository {
     return result.length > 0;
   }
 
+  async getNextPositionInColumn(columnId: string): Promise<number> {
+    const sql = `
+      SELECT COALESCE(MAX(position), 0) + 1 as next_position
+      FROM tasks 
+      WHERE column_id = $1
+    `;
+    const result = await queryOne<{ next_position: number }>(sql, [columnId]);
+    return result?.next_position || 1;
+  }
+
   async moveToColumn(
     id: string,
     newColumnId: string,

@@ -36,7 +36,7 @@ interface EditTaskDialogProps {
 interface EditableSubtask {
   id?: string;
   title: string;
-  status: 'todo' | 'doing' | 'done';
+  status: boolean;
   isNew?: boolean;
 }
 
@@ -81,7 +81,7 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
   }, [open, task]);
 
   const addSubtask = () => {
-    setSubtasks([...subtasks, { title: '', status: 'todo', isNew: true }]);
+    setSubtasks([...subtasks, { title: '', status: false, isNew: true }]);
   };
 
   const updateSubtaskTitle = (index: number, newTitle: string) => {

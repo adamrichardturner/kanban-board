@@ -195,7 +195,7 @@ export class TaskService {
       updates.position = data.position;
     }
 
-    // If moving to a different column, verify the new column exists and belongs to the same board
+    // If moving to a different column, use moveToColumn to avoid position conflicts
     if (data.columnId !== undefined) {
       const boardId = await this.taskRepository.getBoardIdByTaskId(taskId);
       const column = await this.columnRepository.findById(data.columnId);
@@ -206,7 +206,52 @@ export class TaskService {
         );
       }
 
-      updates.column_id = data.columnId;
+      // Get the current task to check if column is actually changing
+      const currentTask = await this.taskRepository.findById(taskId);
+      if (!currentTask) {
+        throw new Error('Task not found');
+      }
+
+      // If the column is actually changing, use moveToColumn
+      if (currentTask.column_id !== data.columnId) {
+        // Get next available position in the target column
+        const nextPosition = await this.taskRepository.getNextPositionInColumn(
+          data.columnId,
+        );
+
+        // Use moveToColumn for safe position handling
+        const movedTask = await this.taskRepository.moveToColumn(
+          taskId,
+          data.columnId,
+          nextPosition,
+        );
+
+        // If there are other updates besides column change, apply them
+        if (
+          updates.title !== undefined ||
+          updates.description !== undefined ||
+          updates.status !== undefined
+        ) {
+          const remainingUpdates: any = {};
+          if (updates.title !== undefined)
+            remainingUpdates.title = updates.title;
+          if (updates.description !== undefined)
+            remainingUpdates.description = updates.description;
+          if (updates.status !== undefined)
+            remainingUpdates.status = updates.status;
+
+          const finalTask = await this.taskRepository.update(
+            taskId,
+            remainingUpdates,
+          );
+          return finalTask ? this.mapTaskResponse(finalTask) : null;
+        }
+
+        return movedTask ? this.mapTaskResponse(movedTask) : null;
+      } else {
+        // Column not changing, just update normally
+        updates.column_id = data.columnId;
+      }
     }
 
     const task = await this.taskRepository.update(taskId, updates);
