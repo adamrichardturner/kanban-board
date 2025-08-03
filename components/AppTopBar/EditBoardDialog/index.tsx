@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,17 +7,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, Plus, EllipsisVertical, Trash2 } from 'lucide-react';
@@ -26,12 +15,12 @@ import { BoardWithColumns } from '@/types';
 import Image from 'next/image';
 
 interface EditBoardDialogProps {
-  board?: BoardWithColumns | null; // Made optional and nullable
+  board?: BoardWithColumns | null;
   trigger?: React.ReactNode;
 }
 
 interface ColumnData {
-  id?: string; // undefined for new columns
+  id?: string;
   name: string;
   position: number;
   isNew?: boolean;
@@ -39,28 +28,16 @@ interface ColumnData {
 
 export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   const [open, setOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [boardName, setBoardName] = useState('');
-  const [columns, setColumns] = useState<ColumnData[]>([]);
+  const [columns, setColumns] = useState<ColumnData[]>(
+    board?.columns.map((col) => ({
+      id: col.id,
+      name: col.name,
+      position: col.position,
+    })) || [],
+  );
 
-  const { updateBoard, deleteBoard, isUpdating, isDeleting } = useBoards();
-
-  // Initialize form data when dialog opens or board changes
-  useEffect(() => {
-    if (open && board) {
-      setBoardName(board.name);
-      const sortedColumns = [...(board.columns || [])].sort(
-        (a, b) => a.position - b.position,
-      );
-      setColumns(
-        sortedColumns.map((col) => ({
-          id: col.id,
-          name: col.name,
-          position: col.position,
-        })),
-      );
-    }
-  }, [open, board]);
+  const { updateBoard, isUpdating } = useBoards();
 
   // Don't render if no board is provided (after hooks)
   if (!board) {
@@ -68,15 +45,18 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   }
 
   const handleAddColumn = () => {
-    const newPosition = Math.max(...columns.map((col) => col.position), -1) + 1;
-    setColumns([
-      ...columns,
-      {
-        name: '',
-        position: newPosition,
-        isNew: true,
-      },
-    ]);
+    if (columns.length < 6) {
+      const newPosition =
+        Math.max(...columns.map((col) => col.position), -1) + 1;
+      setColumns([
+        ...columns,
+        {
+          name: '',
+          position: newPosition,
+          isNew: true,
+        },
+      ]);
+    }
   };
 
   const handleRemoveColumn = (index: number) => {
@@ -113,16 +93,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
 
     updateBoard(board.id, updateData);
     setOpen(false);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteBoard(board.id);
-      setDeleteDialogOpen(false);
-      setOpen(false);
-    } catch (error) {
-      console.error('Failed to delete board:', error);
-    }
   };
 
   const resetForm = () => {
@@ -202,10 +172,11 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                   type='button'
                   variant='ghost'
                   onClick={handleAddColumn}
-                  className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7]'
+                  disabled={columns.length >= 6}
+                  className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Plus className='mr-2 h-4 w-4' />
-                  Add New Column
+                  Add New Column {columns.length >= 6 && '(Max 6)'}
                 </Button>
               </div>
             </div>
@@ -238,59 +209,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                 'Save Changes'
               )}
             </Button>
-
-            <AlertDialog
-              open={deleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-            >
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant='outline'
-                  className='w-full border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700'
-                >
-                  <Trash2 className='mr-2 h-4 w-4' />
-                  Delete Board
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className='sm:max-w-md'>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className='text-red-600'>
-                    Delete this board?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className='text-gray-600'>
-                    Are you sure you want to delete the &apos;{board.name}&apos;
-                    board? This action will remove all columns and tasks and
-                    cannot be reversed.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className='flex flex-col-reverse gap-2 sm:flex-row'>
-                  <AlertDialogCancel className='w-full sm:w-auto'>
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className='w-full bg-red-600 text-white hover:bg-red-700 sm:w-auto'
-                  >
-                    {isDeleting ? (
-                      <div className='flex items-center gap-2'>
-                        <Image
-                          src='/spinner.svg'
-                          alt='Deleting...'
-                          width={16}
-                          height={16}
-                          priority
-                          className='brightness-0 invert'
-                        />
-                        Deleting...
-                      </div>
-                    ) : (
-                      'Delete'
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </DialogContent>
       </Dialog>

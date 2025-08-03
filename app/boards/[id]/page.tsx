@@ -7,6 +7,7 @@ import { use, useEffect } from 'react';
 import { Task } from '@/components/Task';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
+import { CreateColumnDialog } from '@/components/CreateColumnDialog';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -147,20 +148,26 @@ export default function Page({ params }: PageProps) {
               ))}
 
               {/* New Column Button */}
-              <div className='mt-10 w-80 flex-shrink-0'>
-                <div
-                  className='flex h-full min-h-96 cursor-pointer items-center justify-center transition-opacity hover:opacity-80'
-                  style={{
-                    borderRadius: '6px',
-                    background:
-                      'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
-                  }}
-                >
-                  <span className='text-2xl font-bold text-[#828FA3]'>
-                    + New Column
-                  </span>
+              {board.columns.length < 6 && (
+                <div className='mt-10 w-80 flex-shrink-0'>
+                  <CreateColumnDialog
+                    trigger={
+                      <div
+                        className='flex h-full min-h-96 cursor-pointer items-center justify-center transition-opacity hover:opacity-80'
+                        style={{
+                          borderRadius: '6px',
+                          background:
+                            'linear-gradient(180deg, #E9EFFA 0%, rgba(233, 239, 250, 0.50) 100%)',
+                        }}
+                      >
+                        <span className='text-2xl font-bold text-[#828FA3]'>
+                          + New Column
+                        </span>
+                      </div>
+                    }
+                  />
                 </div>
-              </div>
+              )}
             </div>
             <ScrollBar
               orientation='horizontal'

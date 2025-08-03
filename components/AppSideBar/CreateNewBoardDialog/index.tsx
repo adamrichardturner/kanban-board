@@ -22,10 +22,12 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
   const [boardName, setBoardName] = useState('');
   const [columns, setColumns] = useState<string[]>(['Todo', 'Doing']);
 
-  const { createBoard, isCreating } = useBoards();
+  const { createBoard, isCreating, boards } = useBoards();
 
   const handleAddColumn = () => {
-    setColumns([...columns, '']);
+    if (columns.length < 6) {
+      setColumns([...columns, '']);
+    }
   };
 
   const handleRemoveColumn = (index: number) => {
@@ -42,6 +44,12 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
 
   const handleSubmit = () => {
     if (!boardName.trim()) {
+      return;
+    }
+
+    // Check if user has reached the maximum number of boards (8)
+    if (boards && boards.length >= 8) {
+      // Could add a toast notification here if needed
       return;
     }
 
@@ -136,9 +144,10 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
                 type='button'
                 variant='ghost'
                 onClick={handleAddColumn}
-                className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7]'
+                disabled={columns.length >= 6}
+                className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
               >
-                + Add New Column
+                + Add New Column {columns.length >= 6 && '(Max 6)'}
               </Button>
             </div>
           </div>
@@ -147,8 +156,10 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
         {/* Create Button */}
         <Button
           onClick={handleSubmit}
-          disabled={!boardName.trim() || isCreating}
-          className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
+          disabled={
+            !boardName.trim() || isCreating || (boards && boards.length >= 8)
+          }
+          className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90 disabled:cursor-not-allowed disabled:opacity-50'
         >
           {isCreating ? (
             <div className='flex items-center gap-2'>
@@ -162,6 +173,8 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
               />
               Creating...
             </div>
+          ) : boards && boards.length >= 8 ? (
+            'Maximum boards reached (8)'
           ) : (
             'Create New Board'
           )}

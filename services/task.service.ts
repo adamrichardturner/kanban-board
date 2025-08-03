@@ -100,7 +100,7 @@ export class TaskService {
     const subtasksData =
       data.subtasks?.map((subtask) => ({
         title: subtask.title,
-        status: subtask.status || ('todo' as TaskStatus),
+        status: subtask.status || false,
       })) || [];
 
     // Create task with subtasks
@@ -148,7 +148,7 @@ export class TaskService {
     const subtasksData =
       data.subtasks?.map((subtask) => ({
         title: subtask.title,
-        status: subtask.status || ('todo' as TaskStatus),
+        status: subtask.status || false,
       })) || [];
 
     // Create task with subtasks

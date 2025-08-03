@@ -3,7 +3,7 @@ import { Task, TaskStatus, Subtask } from '@/types/kanban';
 
 interface CreateSubtaskData {
   title: string;
-  status?: TaskStatus;
+  status?: boolean;
 }
 
 export class TaskRepository {
@@ -99,7 +99,7 @@ export class TaskRepository {
       await query(subtaskSql, [
         taskId,
         subtask.title,
-        subtask.status || 'todo',
+        subtask.status || false,
         position,
       ]);
     }
@@ -152,7 +152,7 @@ export class TaskRepository {
       const createdSubtask = await queryOne<Subtask>(subtaskSql, [
         taskId,
         subtask.title,
-        subtask.status || 'todo',
+        subtask.status || false,
         position,
       ]);
 

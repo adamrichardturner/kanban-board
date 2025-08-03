@@ -81,7 +81,9 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
   }, [open, task]);
 
   const addSubtask = () => {
-    setSubtasks([...subtasks, { title: '', status: false, isNew: true }]);
+    if (subtasks.length < 8) {
+      setSubtasks([...subtasks, { title: '', status: false, isNew: true }]);
+    }
   };
 
   const updateSubtaskTitle = (index: number, newTitle: string) => {
@@ -232,10 +234,11 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
               type='button'
               variant='outline'
               onClick={addSubtask}
-              className='w-full border-[#635FC7]/25 bg-[#635FC7]/10 text-[#635FC7] hover:bg-[#635FC7]/20'
+              disabled={subtasks.length >= 8}
+              className='w-full border-[#635FC7]/25 bg-[#635FC7]/10 text-[#635FC7] hover:bg-[#635FC7]/20 disabled:cursor-not-allowed disabled:opacity-50'
             >
               <Plus size={16} className='mr-2' />
-              Add New Subtask
+              Add New Subtask {subtasks.length >= 8 && '(Max 8)'}
             </Button>
           </div>
 

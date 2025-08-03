@@ -62,7 +62,9 @@ export function CreateTaskDialog({
   );
 
   const handleAddSubtask = () => {
-    setSubtasks([...subtasks, '']);
+    if (subtasks.length < 8) {
+      setSubtasks([...subtasks, '']);
+    }
   };
 
   const handleRemoveSubtask = (index: number) => {
@@ -139,7 +141,9 @@ export function CreateTaskDialog({
         <div className='space-y-6 py-4'>
           {/* Title */}
           <div className='space-y-2'>
-            <Label htmlFor='title'>Title</Label>
+            <Label htmlFor='title' className='text-[#828FA3]'>
+              Title
+            </Label>
             <Input
               id='title'
               placeholder='e.g. Take coffee break'
@@ -151,7 +155,9 @@ export function CreateTaskDialog({
 
           {/* Description */}
           <div className='space-y-2'>
-            <Label htmlFor='description'>Description</Label>
+            <Label htmlFor='description' className='text-[#828FA3]'>
+              Description
+            </Label>
             <Textarea
               id='description'
               placeholder="e.g. It's always good to take a break. This 15 minute break will recharge the batteries a little."
@@ -163,7 +169,7 @@ export function CreateTaskDialog({
 
           {/* Subtasks */}
           <div className='space-y-2'>
-            <Label>Subtasks</Label>
+            <Label className='text-[#828FA3]'>Subtasks</Label>
             <div className='space-y-2'>
               {subtasks.map((subtask, index) => (
                 <div key={index} className='flex items-center gap-2'>
@@ -194,17 +200,18 @@ export function CreateTaskDialog({
                 type='button'
                 variant='ghost'
                 onClick={handleAddSubtask}
-                className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7]'
+                disabled={subtasks.length >= 6}
+                className='mt-1 w-full cursor-pointer rounded-full bg-[#635FC7]/10 text-[#635FC7] hover:bg-[#635FC7]/20 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
               >
                 <Plus className='mr-2 h-4 w-4' />
-                Add New Subtask
+                Add New Subtask {subtasks.length >= 6 && '(Max 6)'}
               </Button>
             </div>
           </div>
 
           {/* Column Selection */}
           <div className='space-y-2'>
-            <Label>Column</Label>
+            <Label className='text-[#828FA3]'>Status</Label>
             <Select
               value={selectedColumnId}
               onValueChange={setSelectedColumnId}
@@ -232,7 +239,7 @@ export function CreateTaskDialog({
             isCreatingTask ||
             isCreatingTaskWithSubtasks
           }
-          className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
+          className='w-full rounded-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
         >
           {isCreatingTask || isCreatingTaskWithSubtasks ? (
             <div className='flex items-center gap-2'>

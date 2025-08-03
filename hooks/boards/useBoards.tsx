@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { BoardResponse, BoardWithColumns, ApiResponse } from '@/types';
+import {
+  BoardResponse,
+  BoardWithColumns,
+  ColumnResponse,
+  ApiResponse,
+} from '@/types';
 import {
   CreateBoardRequest,
   CreateColumnRequest,
@@ -410,6 +415,58 @@ export function useBoards() {
     },
   });
 
+  const createColumnMutation = useMutation<
+    ColumnResponse,
+    Error,
+    { boardId: string; data: CreateColumnRequest }
+  >({
+    mutationFn: async ({ boardId, data }) => {
+      const res = await fetch(`/api/columns?boardId=${boardId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage =
+          errorData.error || errorData.message || 'Failed to create column';
+        throw new Error(errorMessage);
+      }
+      const responseData: ApiResponse<ColumnResponse> = await res.json();
+      return responseData.data!;
+    },
+    onSuccess: (newColumn) => {
+      // Invalidate board queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+      queryClient.invalidateQueries({
+        queryKey: ['boards', newColumn.boardId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['selectedBoardData', newColumn.boardId],
+      });
+
+      invalidateSelectedBoard();
+      refetchSelectedBoard();
+
+      toast.success('Column created successfully!');
+    },
+    onError: (error) => {
+      console.error('Create column failed:', error);
+      if (
+        error.message.includes('duplicate key') ||
+        error.message.includes('already exists')
+      ) {
+        toast.error(
+          'A column with this name already exists. Please choose a different name.',
+        );
+      } else {
+        toast.error('Failed to create column. Please try again.');
+      }
+    },
+  });
+
   return {
     boards: boardsQuery.data || [],
     isLoading: boardsQuery.isLoading,
@@ -425,12 +482,18 @@ export function useBoards() {
     reorderBoards: (data: ReorderRequest) => reorderBoardsMutation.mutate(data),
     setDefaultBoard: (boardId: string) =>
       setDefaultBoardMutation.mutate(boardId),
+    createColumn: (data: { boardId: string; name: string; color?: string }) =>
+      createColumnMutation.mutate({
+        boardId: data.boardId,
+        data: { name: data.name, color: data.color },
+      }),
 
     isCreating: createBoardMutation.isPending,
     isUpdating: updateBoardMutation.isPending,
     isDeleting: deleteBoardMutation.isPending,
     isReordering: reorderBoardsMutation.isPending,
     isSettingDefault: setDefaultBoardMutation.isPending,
+    isCreatingColumn: createColumnMutation.isPending,
 
     refetch: () => queryClient.invalidateQueries({ queryKey: ['boards'] }),
   };

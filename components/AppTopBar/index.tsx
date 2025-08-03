@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { Edit, EllipsisVertical } from 'lucide-react';
 import { EditBoardDialog } from './EditBoardDialog';
+import { SettingsDropdown } from './SettingsDropdown';
 
 interface AppTopBarProps {
   name: string;
@@ -73,7 +74,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
           boardId={selectedBoardId}
           defaultColumnId={todoColumnId}
         />
-        <EditBoardDialog board={selectedBoard} />
+        <SettingsDropdown board={selectedBoard} />
       </div>
     </div>
   );
