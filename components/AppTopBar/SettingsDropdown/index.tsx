@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,16 +33,14 @@ export function SettingsDropdown({ board }: SettingsDropdownProps) {
   const { logout } = useAuth();
   const { deleteBoard, isDeleting } = useBoards();
 
-  // Trigger the edit dialog when editDialogOpen changes to true
-  useEffect(() => {
-    if (editDialogOpen && editButtonRef.current) {
+  const openEditDialog = () => {
+    if (editButtonRef.current) {
       editButtonRef.current.click();
-      setEditDialogOpen(false); // Reset state after triggering
     }
-  }, [editDialogOpen]);
+  };
 
   const handleEditBoard = () => {
-    setEditDialogOpen(true);
+    openEditDialog();
   };
 
   const handleDeleteBoard = () => {

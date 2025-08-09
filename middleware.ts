@@ -25,6 +25,30 @@ function getDefaultPostLoginRoute(): string {
   return '/boards';
 }
 
+async function getFirstBoardRoute(request: NextRequest): Promise<string> {
+  try {
+    const response = await fetch(new URL('/api/boards', request.url), {
+      headers: {
+        Cookie: request.headers.get('cookie') ?? '',
+      },
+    });
+    if (!response.ok) {
+      return getDefaultPostLoginRoute();
+    }
+    const payload = (await response.json()) as {
+      data?: Array<{ id: string; position: number }>;
+    };
+    const boards = payload.data ?? [];
+    if (boards.length === 0) {
+      return getDefaultPostLoginRoute();
+    }
+    const sorted = [...boards].sort((a, b) => a.position - b.position);
+    return `/boards/${sorted[0].id}`;
+  } catch {
+    return getDefaultPostLoginRoute();
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -36,10 +60,14 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = ['/'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  // If there's a token, validate it
+  // If there's a token, validate it (skip external validation in development to cut noise)
   let isAuthenticated = false;
   if (hasToken) {
-    isAuthenticated = await validateAuthToken(request);
+    if (process.env.NODE_ENV === 'development') {
+      isAuthenticated = true;
+    } else {
+      isAuthenticated = await validateAuthToken(request);
+    }
 
     // If token exists but is invalid, clear it and redirect to home
     if (!isAuthenticated) {
@@ -55,9 +83,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Redirect authenticated users away from public routes to their dashboard
+  // Redirect authenticated users away from public routes to their first/default board
   if (isAuthenticated && isPublicRoute) {
-    const postLoginRoute = getDefaultPostLoginRoute();
+    const postLoginRoute = await getFirstBoardRoute(request);
     return NextResponse.redirect(new URL(postLoginRoute, request.url));
   }
 

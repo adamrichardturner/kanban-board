@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -59,26 +59,20 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
     isDeletingSubtask,
   } = useTasks();
 
-  // Initialize form data when dialog opens or task changes
-  useEffect(() => {
-    if (open && task) {
-      setTitle(task.title);
-      setDescription(task.description || '');
-      setSelectedColumnId(task.columnId);
-
-      // Convert existing subtasks to editable format
-      const editableSubtasks: EditableSubtask[] = task.subtasks.map(
-        (subtask) => ({
-          id: subtask.id,
-          title: subtask.title,
-          status: subtask.status,
-          isNew: false,
-        }),
-      );
-
-      setSubtasks(editableSubtasks);
-    }
-  }, [open, task]);
+  const initializeFromTask = () => {
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setSelectedColumnId(task.columnId);
+    const editableSubtasks: EditableSubtask[] = task.subtasks.map(
+      (subtask) => ({
+        id: subtask.id,
+        title: subtask.title,
+        status: subtask.status,
+        isNew: false,
+      }),
+    );
+    setSubtasks(editableSubtasks);
+  };
 
   const addSubtask = () => {
     if (subtasks.length < 8) {
@@ -159,7 +153,15 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
     isDeletingSubtask;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (newOpen) {
+          initializeFromTask();
+        }
+      }}
+    >
       <DialogTrigger asChild>
         {trigger || (
           <div className='cursor-pointer'>

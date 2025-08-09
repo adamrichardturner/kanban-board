@@ -8,7 +8,7 @@ export function Task({ task }: { task: TaskWithSubtasks }) {
       task={task}
       trigger={
         <Card
-          className='cursor-pointer rounded-lg border-none bg-white transition-transform hover:scale-[1.02] dark:bg-[#2B2C37]'
+          className='cursor-pointer rounded-lg border-none bg-white transition-transform dark:bg-[#2B2C37]'
           style={{
             boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
           }}

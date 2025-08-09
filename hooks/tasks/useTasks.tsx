@@ -50,9 +50,10 @@ export function useTasks() {
       queryKey: ['tasks', 'column', columnId],
       queryFn: () => getColumnTasks(columnId),
       enabled: !!columnId,
-      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
-      refetchOnMount: 'always', // Always refetch when component mounts
-      refetchOnWindowFocus: true, // Refetch when window gains focus
+      // Keep fresh via explicit invalidations from mutations; avoid double calls on mount
+      staleTime: 1000 * 15,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     });
   };
 
@@ -61,9 +62,9 @@ export function useTasks() {
       queryKey: ['tasks', taskId],
       queryFn: () => getTask(taskId),
       enabled: !!taskId,
-      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
-      refetchOnMount: 'always', // Always refetch when component mounts
-      refetchOnWindowFocus: true, // Refetch when window gains focus
+      staleTime: 1000 * 15,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     });
   };
 
@@ -72,9 +73,9 @@ export function useTasks() {
       queryKey: ['subtasks', 'task', taskId],
       queryFn: () => getTaskSubtasks(taskId),
       enabled: !!taskId,
-      staleTime: 0, // Always refetch when invalidated - ensures fresh column data
-      refetchOnMount: 'always', // Always refetch when component mounts
-      refetchOnWindowFocus: true, // Refetch when window gains focus
+      staleTime: 1000 * 15,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     });
   };
 

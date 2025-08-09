@@ -41,18 +41,23 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     retry: false,
   });
 }
 
-export function usePostLoginRoute() {
+export function usePostLoginRoute(enabledOverride?: boolean) {
   const { isAuthenticated } = useAuth();
+  const enabled = enabledOverride ?? isAuthenticated;
 
   return useQuery<string, Error>({
     queryKey: ['postLoginRoute'],
     queryFn: fetchPostLoginRoute,
-    enabled: isAuthenticated, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 2, // Cache for 2 minutes
+    enabled,
+    staleTime: 1000 * 60 * 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     retry: 1,
   });
 }

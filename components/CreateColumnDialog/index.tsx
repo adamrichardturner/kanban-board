@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -26,13 +26,7 @@ export function CreateColumnDialog({ trigger }: CreateColumnDialogProps) {
   const { selectedBoard, selectedBoardId } = useSelectedBoard();
   const { createColumn, isCreatingColumn } = useBoards();
 
-  // Reset form when dialog closes
-  useEffect(() => {
-    if (!open) {
-      setColumnName('');
-      setSelectedColor('#635FC7');
-    }
-  }, [open]);
+  // Reset handled explicitly on dialog close in onOpenChange
 
   const handleSubmit = () => {
     if (!columnName.trim() || !selectedBoardId) {

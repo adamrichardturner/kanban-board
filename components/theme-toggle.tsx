@@ -7,12 +7,10 @@ import { Switch } from '@/components/ui/switch';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  // Avoid hydration mismatch
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Avoid hydration mismatch without an effect
+  const [mounted] = React.useState<boolean>(
+    () => typeof window !== 'undefined',
+  );
 
   if (!mounted) {
     return (

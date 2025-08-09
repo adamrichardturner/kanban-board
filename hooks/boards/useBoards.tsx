@@ -100,7 +100,10 @@ export function useBoards() {
   const boardsQuery = useQuery<BoardResponse[], Error>({
     queryKey: ['boards'],
     queryFn: getUserBoards,
+    // Keep results fresh enough but avoid multiple refetches on mount/focus
     staleTime: 1000 * 60 * 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const useBoardQuery = (boardId: string) => {
@@ -109,6 +112,8 @@ export function useBoards() {
       queryFn: () => getBoard(boardId),
       enabled: Boolean(boardId),
       staleTime: 1000 * 60 * 1,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     });
   };
 
@@ -212,9 +217,7 @@ export function useBoards() {
       });
 
       // Invalidate the detailed board cache to force refetch with updated columns
-      queryClient.invalidateQueries({
-        queryKey: ['boards', updatedBoard.id],
-      });
+      queryClient.invalidateQueries({ queryKey: ['boards', updatedBoard.id] });
 
       // Force immediate refetch of selected board data to ensure fresh columns
       invalidateSelectedBoard();

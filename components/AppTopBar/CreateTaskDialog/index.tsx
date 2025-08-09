@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -48,12 +48,11 @@ export function CreateTaskDialog({
   } = useTasks();
   const { selectedBoard } = useSelectedBoard();
 
-  // Set default column when dialog opens or defaultColumnId changes
-  useEffect(() => {
-    if (open && defaultColumnId) {
-      setSelectedColumnId(defaultColumnId);
-    }
-  }, [open, defaultColumnId]);
+  const initialColumnId = useMemo(
+    () => defaultColumnId || '',
+    [defaultColumnId],
+  );
+  const effectiveSelectedColumnId = selectedColumnId || initialColumnId;
 
   // Get available columns from the selected board
   const availableColumns = selectedBoard?.columns || [];
@@ -80,7 +79,7 @@ export function CreateTaskDialog({
   };
 
   const handleSubmit = () => {
-    if (!title.trim() || !selectedColumnId) return;
+    if (!title.trim() || !effectiveSelectedColumnId) return;
 
     const filteredSubtasks = subtasks
       .filter((subtask) => subtask.trim())
@@ -89,7 +88,7 @@ export function CreateTaskDialog({
     const taskData: CreateTaskRequest = {
       title: title.trim(),
       description: description.trim() || undefined,
-      columnId: selectedColumnId,
+      columnId: effectiveSelectedColumnId,
       subtasks: filteredSubtasks,
     };
 
@@ -104,7 +103,7 @@ export function CreateTaskDialog({
     setTitle('');
     setDescription('');
     setSubtasks(['']);
-    setSelectedColumnId(defaultColumnId || '');
+    setSelectedColumnId(initialColumnId);
     setOpen(false);
   };
 
@@ -112,7 +111,7 @@ export function CreateTaskDialog({
     setTitle('');
     setDescription('');
     setSubtasks(['']);
-    setSelectedColumnId(defaultColumnId || '');
+    setSelectedColumnId(initialColumnId);
   };
 
   return (
@@ -216,7 +215,7 @@ export function CreateTaskDialog({
           <div className='space-y-2'>
             <Label className='text-[#828FA3] dark:text-white'>Status</Label>
             <Select
-              value={selectedColumnId}
+              value={effectiveSelectedColumnId}
               onValueChange={setSelectedColumnId}
             >
               <SelectTrigger className='w-full'>

@@ -6,7 +6,23 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Reduce unnecessary refetches in dev and in general
+            staleTime: 1000 * 60, // 1 minute default
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            retry: 1,
+          },
+          mutations: {
+            retry: 1,
+          },
+        },
+      }),
+  );
 
   return (
     <QueryClientProvider client={queryClient}>

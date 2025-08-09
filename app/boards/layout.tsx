@@ -6,15 +6,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { useAuth, usePostLoginRoute } from '@/hooks/auth/useAuth';
-import { AuthRedirect } from '@/components/AuthRedirect';
+import { useAuth } from '@/hooks/auth/useAuth';
 import Image from 'next/image';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isLoading: routeLoading } = usePostLoginRoute();
 
-  if (authLoading || (isAuthenticated && routeLoading)) {
+  if (authLoading) {
     return (
       <div className='flex min-h-screen items-center justify-center'>
         <Image
@@ -30,10 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <AuthRedirect />
-      {!isAuthenticated ? (
-        children
-      ) : (
+      {isAuthenticated ? (
         <SidebarProvider>
           <SidebarTrigger />
           <AppSidebar />
@@ -41,6 +36,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {children}
           </SidebarInset>
         </SidebarProvider>
+      ) : (
+        children
       )}
     </>
   );

@@ -20,7 +20,7 @@ interface CreateNewBoardDialogProps {
 export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
   const [open, setOpen] = useState(false);
   const [boardName, setBoardName] = useState('');
-  const [columns, setColumns] = useState<string[]>(['Todo', 'Doing']);
+  const [columns, setColumns] = useState<string[]>(['Todo', 'Doing', 'Done']);
 
   const { createBoard, isCreating, boards } = useBoards();
 
@@ -62,13 +62,13 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
     });
 
     setBoardName('');
-    setColumns(['Todo', 'Doing']);
+    setColumns(['Todo', 'Doing', 'Done']);
     setOpen(false);
   };
 
   const resetForm = () => {
     setBoardName('');
-    setColumns(['Todo', 'Doing']);
+    setColumns(['Todo', 'Doing', 'Done']);
   };
 
   return (

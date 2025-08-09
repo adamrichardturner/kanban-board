@@ -2,8 +2,7 @@
 
 import { AppTopBar } from '@/components/AppTopBar';
 import { useBoard } from '@/hooks/boards/useBoards';
-import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
-import { use, useEffect } from 'react';
+import { use } from 'react';
 import { Task } from '@/components/Task';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -17,16 +16,13 @@ interface PageProps {
 export default function Page({ params }: PageProps) {
   const { id } = use(params);
   const { data: board, isLoading, error } = useBoard(id);
-  const { setSelectedBoard } = useSelectedBoard();
   const { open: sidebarOpen, isMobile } = useSidebar();
   const { theme } = useTheme();
 
   // Calculate content width based on sidebar state
   const scrollAreaWidth = getScrollAreaWidth(isMobile, sidebarOpen);
 
-  useEffect(() => {
-    setSelectedBoard(id);
-  }, [id, setSelectedBoard]);
+  // selectedBoardId is derived from the URL in useSelectedBoard; no effect needed here
 
   function getScrollAreaWidth(isMobile: boolean, sidebarOpen: boolean) {
     if (isMobile) {

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BoardWithColumns } from '@/types';
 import { useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function useSelectedBoard() {
   const queryClient = useQueryClient();
@@ -17,42 +18,57 @@ export function useSelectedBoard() {
     gcTime: 0,
   });
 
+  const pathname = usePathname();
+  const routeBoardId = useMemo(() => {
+    if (!pathname) {
+      return '';
+    }
+    const match = pathname.match(/^\/boards\/([^\/]+)/);
+    if (!match) {
+      return '';
+    }
+    return match[1];
+  }, [pathname]);
+
+  const effectiveSelectedBoardId = useMemo(() => {
+    if (routeBoardId) {
+      return routeBoardId;
+    }
+    return selectedBoardQuery.data || '';
+  }, [routeBoardId, selectedBoardQuery.data]);
+
   const selectedBoardData = useQuery<BoardWithColumns | null>({
-    queryKey: ['selectedBoardData', selectedBoardQuery.data],
+    // Share the same key as useBoard(boardId) to avoid duplicate fetches
+    queryKey: ['boards', effectiveSelectedBoardId],
     queryFn: async () => {
-      const boardId = selectedBoardQuery.data;
-      if (!boardId) return null;
+      const boardId = effectiveSelectedBoardId;
+      if (!boardId) {
+        return null;
+      }
 
-      // Always fetch fresh data from API - no cache lookup
-      // This ensures EditBoardDialog always gets current column data
       try {
-        console.log('Fetching fresh board data for:', boardId);
         const res = await fetch(`/api/boards/${boardId}`);
-        if (!res.ok) return null;
-
-        const data = await res.json();
-        console.log(
-          'Fresh board data received:',
-          data.data?.name,
-          'columns:',
-          data.data?.columns?.length,
-        );
-        return data.data;
+        if (!res.ok) {
+          return null;
+        }
+        const data = (await res.json()) as { data: BoardWithColumns | null };
+        return data.data ?? null;
       } catch (error) {
         console.error('Failed to fetch selected board:', error);
         return null;
       }
     },
-    enabled: !!selectedBoardQuery.data,
-    staleTime: 0, // Always refetch when invalidated - ensures fresh column data
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    enabled: !!effectiveSelectedBoardId,
+    // Cache briefly to avoid duplicate calls across components on mount
+    staleTime: 1000 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Ensure selectedBoardId is always a string
   const selectedBoardId: string = useMemo(() => {
-    return selectedBoardQuery.data || '';
-  }, [selectedBoardQuery.data]);
+    return effectiveSelectedBoardId;
+  }, [effectiveSelectedBoardId]);
 
   // Find the todo column ID from the selected board
   const todoColumnId: string = useMemo(() => {
@@ -108,10 +124,12 @@ export function useSelectedBoard() {
   };
 
   const invalidateSelectedBoard = () => {
-    // Invalidate all selectedBoardData queries to ensure fresh data
-    queryClient.invalidateQueries({
-      queryKey: ['selectedBoardData'],
-    });
+    // Invalidate board detail queries so consumers refetch as needed
+    if (selectedBoardId) {
+      queryClient.invalidateQueries({ queryKey: ['boards', selectedBoardId] });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    }
   };
 
   return {
