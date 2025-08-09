@@ -38,7 +38,9 @@ export function CreateTaskDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subtasks, setSubtasks] = useState<string[]>(['']);
-  const [selectedColumnId, setSelectedColumnId] = useState('');
+  const [selectedColumnId, setSelectedColumnId] = useState(
+    defaultColumnId ?? '',
+  );
 
   const {
     createTask,
@@ -237,7 +239,7 @@ export function CreateTaskDialog({
           onClick={handleSubmit}
           disabled={
             !title.trim() ||
-            !selectedColumnId ||
+            !effectiveSelectedColumnId ||
             isCreatingTask ||
             isCreatingTaskWithSubtasks
           }

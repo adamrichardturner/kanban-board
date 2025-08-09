@@ -121,8 +121,8 @@ function BoardSkeleton() {
       >
         <div></div>
         <div className='flex items-center gap-4'>
-          <div className='h-10 w-32 rounded-md bg-gray-200'></div>
-          <div className='h-10 w-28 rounded-md bg-gray-200'></div>
+          <div className='h-10 w-32 rounded-md bg-gray-200 dark:bg-[#2B2C37]'></div>
+          <div className='h-10 w-28 rounded-md bg-gray-200 dark:bg-[#2B2C37]'></div>
         </div>
       </div>
       <div className='flex gap-6 overflow-x-auto p-6'>
@@ -133,23 +133,23 @@ function BoardSkeleton() {
         ].map((column, i) => (
           <div key={i} className='w-80 flex-shrink-0'>
             <div className='mb-6 flex items-center gap-3'>
-              <div className='h-4 w-4 rounded-full bg-gradient-to-r from-blue-200 to-blue-300'></div>
+              <div className='h-4 w-4 rounded-full bg-gray-300 dark:bg-[#6B7280]'></div>
               <div
-                className={`h-3 ${column.headerWidth} rounded-md bg-gray-200`}
+                className={`h-3 ${column.headerWidth} rounded-md bg-gray-200 dark:bg-[#3E4050]`}
               ></div>
             </div>
             <div className='space-y-3'>
               {Array.from({ length: column.tasks }).map((_, j) => (
                 <div
                   key={j}
-                  className='rounded-lg border-none bg-white p-4'
+                  className='rounded-lg border-none bg-white p-4 dark:bg-[#2B2C37]'
                   style={{ boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)' }}
                 >
                   <div
-                    className={`h-4 ${j % 2 === 0 ? 'w-3/4' : 'w-5/6'} mb-3 rounded-md bg-gray-200`}
+                    className={`mb-3 h-4 ${j % 2 === 0 ? 'w-3/4' : 'w-5/6'} rounded-md bg-gray-200 dark:bg-[#3E4050]`}
                   ></div>
                   <div
-                    className={`h-3 ${j % 3 === 0 ? 'w-1/2' : 'w-2/3'} rounded-md bg-gray-100`}
+                    className={`h-3 ${j % 3 === 0 ? 'w-1/2' : 'w-2/3'} rounded-md bg-gray-100 dark:bg-[#3E4050]`}
                   ></div>
                 </div>
               ))}

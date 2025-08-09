@@ -47,8 +47,19 @@ export function useBoards() {
       const name = columnNames[i];
       console.log(`Creating column ${i + 1}/${columnNames.length}: "${name}"`);
 
+      const lower = name.trim().toLowerCase();
+      let color: string | undefined;
+      if (lower === 'to do' || lower === 'todo') {
+        color = '#6B7280';
+      } else if (lower === 'in progress' || lower === 'doing') {
+        color = '#F59E0B';
+      } else if (lower === 'done') {
+        color = '#10B981';
+      }
+
       const columnData: CreateColumnRequest = {
         name,
+        color,
       };
 
       const response = await fetch(`/api/columns?boardId=${boardId}`, {
