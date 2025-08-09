@@ -7,7 +7,7 @@ Set these in your Vercel project settings (https://vercel.com/dashboard -> your-
 ### Production Environment Variables
 
 ```
-DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5432/kanban_board
+DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5433/kanban_board
 DATABASE_SSL=require
 NEXT_PUBLIC_BASE_URL=https://your-vercel-app.vercel.app
 NODE_ENV=production
@@ -16,7 +16,7 @@ NODE_ENV=production
 ### Development Environment Variables (for local development)
 
 ```
-DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5432/kanban_board
+DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5433/kanban_board
 DATABASE_SSL=require
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NODE_ENV=development
@@ -69,7 +69,7 @@ To develop locally while using the remote database:
 2. **Edit .env.local with your values**
 
    ```
-   DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5432/kanban_board
+   DATABASE_URL=postgresql://kanban_user:your_password@kanban-db.adamrichardturner.dev:5433/kanban_board
    DATABASE_SSL=require
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
    NODE_ENV=development
