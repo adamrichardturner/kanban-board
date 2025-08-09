@@ -8,11 +8,25 @@ import {
 import { SortableTask } from './SortableTask';
 import { ColumnWithTasks } from '@/types';
 
-export function DroppableColumn({ column }: { column: ColumnWithTasks }) {
+export function DroppableColumn({
+  column,
+  activeTaskSourceColumnId,
+  overColumnId,
+}: {
+  column: ColumnWithTasks;
+  activeTaskSourceColumnId?: string | null;
+  overColumnId?: string | null;
+}) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
     data: { type: 'column' },
   });
+
+  const isForeignOver = Boolean(
+    overColumnId === column.id &&
+      activeTaskSourceColumnId &&
+      activeTaskSourceColumnId !== column.id,
+  );
 
   return (
     <div
@@ -21,6 +35,10 @@ export function DroppableColumn({ column }: { column: ColumnWithTasks }) {
       style={{
         outline: isOver ? '2px solid #6366F1' : 'none',
         outlineOffset: 4,
+        backgroundColor: isForeignOver
+          ? 'rgba(99, 102, 241, 0.08)'
+          : 'transparent',
+        padding: '10px',
       }}
     >
       {/* Column header */}

@@ -96,9 +96,18 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
                 />
               }
             >
-              <div className='flex w-max gap-6 pb-4'>
+              <div className='flex w-max gap-2 pb-4'>
                 {dnd.board.columns.map((column) => (
-                  <DroppableColumn key={column.id} column={column} />
+                  <DroppableColumn
+                    key={column.id}
+                    column={column}
+                    activeTaskSourceColumnId={
+                      dnd.activeTaskId
+                        ? findTaskColumnId(dnd.board, dnd.activeTaskId)
+                        : null
+                    }
+                    overColumnId={dnd.overColumnId}
+                  />
                 ))}
                 {board.columns.length < 6 && (
                   <div className='mt-10 w-80 flex-shrink-0'>
@@ -133,6 +142,16 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
       </div>
     </div>
   );
+}
+
+function findTaskColumnId(
+  board: BoardWithColumns,
+  taskId: string,
+): string | null {
+  for (const col of board.columns) {
+    if (col.tasks.some((t) => t.id === taskId)) return col.id;
+  }
+  return null;
 }
 
 function BoardSkeleton() {

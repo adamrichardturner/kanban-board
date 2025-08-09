@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from 'react';
 export function useTaskDnd(initial: BoardWithColumns) {
   const [board, setBoard] = useState<BoardWithColumns>(initial);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [overColumnId, setOverColumnId] = useState<string | null>(null);
   const { moveTaskAsync, reorderTasksAsync } = useTasks();
 
   useEffect(() => {
@@ -26,7 +27,24 @@ export function useTaskDnd(initial: BoardWithColumns) {
     }
   }, []);
 
-  const onDragOver = useCallback((_e: DragOverEvent) => {}, []);
+  const onDragOver = useCallback(
+    (e: DragOverEvent) => {
+      const over = e.over;
+      if (!over) {
+        setOverColumnId(null);
+        return;
+      }
+      const overId = String(over.id);
+      const overTask = findTask(board, overId);
+      if (overTask) {
+        setOverColumnId(overTask.colId);
+        return;
+      }
+      // If not a task, assume it's a column id
+      setOverColumnId(overId);
+    },
+    [board],
+  );
 
   const onDragEnd = useCallback(
     async (e: DragEndEvent) => {
@@ -79,7 +97,14 @@ export function useTaskDnd(initial: BoardWithColumns) {
     [board, moveTaskAsync, reorderTasksAsync],
   );
 
-  return { board, activeTaskId, onDragStart, onDragOver, onDragEnd };
+  return {
+    board,
+    activeTaskId,
+    overColumnId,
+    onDragStart,
+    onDragOver,
+    onDragEnd,
+  };
 }
 
 function clone<T>(x: T): T {

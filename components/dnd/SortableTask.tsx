@@ -43,18 +43,7 @@ export function SortableTask({ task }: { task: TaskWithSubtasks }) {
       {...listeners}
     >
       {isOver && (
-        <div
-          style={{
-            position: 'absolute',
-            top: -8,
-            left: 0,
-            right: 0,
-            height: 4,
-            borderTop: '3px dashed #635fc7',
-            borderRadius: 2,
-            opacity: 0.6,
-          }}
-        />
+        <div className='absolute top-0 right-0 left-0 h-4 rounded-md opacity-60' />
       )}
       <Task task={task} />
     </div>

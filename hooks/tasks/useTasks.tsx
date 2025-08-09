@@ -176,8 +176,116 @@ export function useTasks() {
   const updateTaskMutation = useMutation<
     TaskResponse,
     Error,
-    { taskId: string; data: UpdateTaskRequest }
+    { taskId: string; data: UpdateTaskRequest },
+    {
+      previousTask?: TaskWithSubtasks;
+      prevSourceTasks?: TaskResponse[];
+      prevTargetTasks?: TaskResponse[];
+      sourceColumnId?: string;
+      targetColumnId?: string;
+    }
   >({
+    onMutate: async ({ taskId, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks', taskId] });
+
+      const previousTask = queryClient.getQueryData<TaskWithSubtasks>([
+        'tasks',
+        taskId,
+      ]);
+
+      if (!previousTask) {
+        return {
+          previousTask: undefined,
+          prevSourceTasks: undefined,
+          prevTargetTasks: undefined,
+          sourceColumnId: undefined,
+          targetColumnId: undefined,
+        };
+      }
+
+      const optimisticTask: TaskWithSubtasks = {
+        ...previousTask,
+        title: data.title ?? previousTask.title,
+        description: data.description ?? previousTask.description,
+        columnId: data.columnId ?? previousTask.columnId,
+      };
+
+      // Update individual task cache optimistically
+      queryClient.setQueryData(['tasks', taskId], optimisticTask);
+
+      // If column changed, optimistically move between column task lists
+      const sourceColumnId = previousTask.columnId;
+      const targetColumnId = data.columnId ?? previousTask.columnId;
+
+      const prevSourceTasks = queryClient.getQueryData<TaskResponse[]>([
+        'tasks',
+        'column',
+        sourceColumnId,
+      ]);
+      const prevTargetTasks = queryClient.getQueryData<TaskResponse[]>([
+        'tasks',
+        'column',
+        targetColumnId,
+      ]);
+
+      if (data.columnId && data.columnId !== sourceColumnId) {
+        // remove from source
+        if (prevSourceTasks) {
+          queryClient.setQueryData<TaskResponse[]>(
+            ['tasks', 'column', sourceColumnId],
+            prevSourceTasks.filter((t) => t.id !== previousTask.id),
+          );
+        }
+        // add to target (append to end; server will normalize positions)
+        const basicTask: TaskResponse = {
+          id: optimisticTask.id,
+          boardId: optimisticTask.boardId,
+          columnId: targetColumnId,
+          title: optimisticTask.title,
+          description: optimisticTask.description,
+          status: optimisticTask.status,
+          position: optimisticTask.position,
+          createdAt: optimisticTask.createdAt,
+          updatedAt: optimisticTask.updatedAt,
+        };
+
+        if (prevTargetTasks) {
+          queryClient.setQueryData<TaskResponse[]>(
+            ['tasks', 'column', targetColumnId],
+            [...prevTargetTasks, basicTask],
+          );
+        } else {
+          queryClient.setQueryData<TaskResponse[]>(
+            ['tasks', 'column', targetColumnId],
+            [basicTask],
+          );
+        }
+      } else {
+        // Update within same column list
+        if (prevSourceTasks) {
+          queryClient.setQueryData<TaskResponse[]>(
+            ['tasks', 'column', sourceColumnId],
+            prevSourceTasks.map((t) =>
+              t.id === optimisticTask.id
+                ? {
+                    ...t,
+                    title: optimisticTask.title,
+                    description: optimisticTask.description,
+                  }
+                : t,
+            ),
+          );
+        }
+      }
+
+      return {
+        previousTask,
+        prevSourceTasks,
+        prevTargetTasks,
+        sourceColumnId,
+        targetColumnId,
+      };
+    },
     mutationFn: async ({ taskId, data }) => {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
@@ -195,55 +303,37 @@ export function useTasks() {
       const response: ApiResponse<TaskResponse> = await res.json();
       return response.data!;
     },
-    onSuccess: (updatedTask, { data }) => {
-      queryClient.setQueryData(
-        ['tasks', updatedTask.id],
-        (old: TaskWithSubtasks | undefined) => {
-          return old ? { ...old, ...updatedTask } : undefined;
-        },
-      );
-
-      if (data.columnId && data.columnId !== updatedTask.columnId) {
-        queryClient.setQueryData<TaskResponse[]>(
-          ['tasks', 'column', updatedTask.columnId],
-          (old) =>
-            old ? old.filter((task) => task.id !== updatedTask.id) : [],
-        );
-
-        queryClient.setQueryData<TaskResponse[]>(
-          ['tasks', 'column', data.columnId],
-          (old) => (old ? [...old, updatedTask] : [updatedTask]),
-        );
-      } else {
-        queryClient.setQueryData<TaskResponse[]>(
-          ['tasks', 'column', updatedTask.columnId],
-          (old) =>
-            old
-              ? old.map((task) =>
-                  task.id === updatedTask.id ? updatedTask : task,
-                )
-              : [updatedTask],
+    onError: (error, _variables, context) => {
+      if (context?.previousTask) {
+        queryClient.setQueryData(
+          ['tasks', context.previousTask.id],
+          context.previousTask,
         );
       }
-
+      if (context?.prevSourceTasks && context.sourceColumnId) {
+        queryClient.setQueryData<TaskResponse[]>(
+          ['tasks', 'column', context.sourceColumnId],
+          context.prevSourceTasks,
+        );
+      }
+      if (context?.prevTargetTasks && context.targetColumnId) {
+        queryClient.setQueryData<TaskResponse[]>(
+          ['tasks', 'column', context.targetColumnId],
+          context.prevTargetTasks,
+        );
+      }
+      console.error('Update task failed:', error);
+      toast.error('Failed to update task. Please try again.');
+    },
+    onSettled: (updatedTask) => {
+      if (!updatedTask) return;
+      queryClient.invalidateQueries({ queryKey: ['tasks', updatedTask.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', 'column', updatedTask.columnId],
+      });
       queryClient.invalidateQueries({
         queryKey: ['boards', updatedTask.boardId],
       });
-
-      toast.success('Task updated successfully!');
-    },
-    onError: (error) => {
-      console.error('Update task failed:', error);
-
-      // Check if it's a position conflict error
-      if (
-        error.message.includes('duplicate key') ||
-        error.message.includes('position')
-      ) {
-        toast.error('Task position conflict. Please try again.');
-      } else {
-        toast.error('Failed to update task. Please try again.');
-      }
     },
   });
 
@@ -717,6 +807,10 @@ export function useTasks() {
       moveTaskMutation.mutate({ taskId, data }),
     reorderTasks: (columnId: string, data: ReorderRequest) =>
       reorderTasksMutation.mutate({ columnId, data }),
+    reorderTasksAsync: (columnId: string, data: ReorderRequest) =>
+      reorderTasksMutation.mutateAsync({ columnId, data }),
+    moveTaskAsync: (taskId: string, data: MoveTaskRequest) =>
+      moveTaskMutation.mutateAsync({ taskId, data }),
 
     // Subtask actions
     createSubtask: (taskId: string, data: CreateSubtaskRequest) =>
