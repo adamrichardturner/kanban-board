@@ -1,4 +1,4 @@
-# Vercel Deployment Configuration
+# Vercel Deployment
 
 ## Environment Variables
 
