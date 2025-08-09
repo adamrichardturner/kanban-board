@@ -71,8 +71,9 @@ export async function middleware(request: NextRequest) {
 
     // If token exists but is invalid, clear it and redirect to home
     if (!isAuthenticated) {
-      console.log('Invalid token detected, clearing and redirecting to /');
-      const response = NextResponse.redirect(new URL('/', request.url));
+      const response = isPublicRoute
+        ? NextResponse.next()
+        : NextResponse.redirect(new URL('/', request.url));
       response.cookies.delete('token');
       return response;
     }
