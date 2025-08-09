@@ -1,4 +1,4 @@
-import { query, queryOne } from '@/lib/db';
+import { query, queryOne, withTransaction, queryWithClient } from '@/lib/db';
 import { Task, TaskStatus, Subtask } from '@/types/kanban';
 
 interface CreateSubtaskData {
@@ -264,12 +264,36 @@ export class TaskRepository {
     columnId: string,
     items: { id: string; position: number }[],
   ): Promise<void> {
-    for (const item of items) {
-      await query(
-        'UPDATE tasks SET position = $1 WHERE id = $2 AND column_id = $3',
-        [item.position, item.id, columnId],
-      );
-    }
+    // Perform a single transactional update using a VALUES table to avoid
+    // intermediate unique violations and minimize round trips.
+    await withTransaction(async (client) => {
+      // Ensure we only touch tasks in the target column and provided ids
+      const valuesSqlParts: string[] = [];
+      const params: unknown[] = [];
+
+      // Build VALUES list like: (id, position)
+      for (let i = 0; i < items.length; i++) {
+        const base = i * 2;
+        valuesSqlParts.push(`($${base + 1}::uuid, $${base + 2}::int)`);
+        params.push(items[i].id, items[i].position);
+      }
+
+      if (valuesSqlParts.length === 0) {
+        return;
+      }
+
+      const sql = `
+        UPDATE tasks AS t
+        SET position = v.position
+        FROM (
+          VALUES ${valuesSqlParts.join(', ')}
+        ) AS v(id, position)
+        WHERE t.id = v.id AND t.column_id = $${params.length + 1}
+      `;
+
+      params.push(columnId);
+      await queryWithClient(client, sql, params);
+    });
   }
 
   async verifyBoardOwnership(taskId: string, userId: string): Promise<boolean> {
