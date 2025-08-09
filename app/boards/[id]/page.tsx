@@ -17,16 +17,21 @@ async function fetchBoard(id: string) {
   return data;
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ['boards', params.id],
-    queryFn: () => fetchBoard(params.id),
+    queryKey: ['boards', id],
+    queryFn: () => fetchBoard(id),
   });
   const state = dehydrate(queryClient);
   return (
     <HydrationBoundary state={state}>
-      <ClientBoardPage boardId={params.id} />
+      <ClientBoardPage boardId={id} />
     </HydrationBoundary>
   );
 }
