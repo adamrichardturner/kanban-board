@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Plus } from 'lucide-react';
+import { Plus, X as Close } from 'lucide-react';
 import { CreateTaskRequest } from '@/types/kanban';
 import { useTasks } from '@/hooks/tasks/useTasks';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
@@ -128,13 +128,16 @@ export function CreateTaskDialog({
         {trigger || (
           <Button
             variant='outline'
-            className='h-[48px] w-[164px] cursor-pointer rounded-full bg-[#635FC7] text-white transition-colors hover:bg-[#635FC7]/90 hover:text-white dark:bg-[#635FC7] dark:text-white dark:hover:bg-[#635FC7]/90'
+            className='h-[32px] w-[48px] cursor-pointer rounded-full bg-[#635FC7] text-white transition-colors hover:bg-[#635FC7]/90 hover:text-white md:h-[48px] md:w-[164px] dark:bg-[#635FC7] dark:text-white dark:hover:bg-[#635FC7]/90'
           >
-            + Add New Task
+            <span className='md:hidden'>
+              <Plus className='h-5 w-5 text-white' />
+            </span>
+            <span className='hidden md:inline'>+ Add New Task</span>
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='inset:4 rounded-lg sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
         </DialogHeader>
@@ -176,7 +179,10 @@ export function CreateTaskDialog({
             <Label className='text-[#828FA3] dark:text-white'>Subtasks</Label>
             <div className='space-y-2'>
               {subtasks.map((subtask, index) => (
-                <div key={index} className='flex items-center gap-2'>
+                <div
+                  key={index}
+                  className='flex items-center gap-0 space-x-0 px-0'
+                >
                   <Input
                     placeholder={
                       index === 0
@@ -190,12 +196,12 @@ export function CreateTaskDialog({
                   <Button
                     type='button'
                     variant='ghost'
-                    size='sm'
+                    size='icon'
                     onClick={() => handleRemoveSubtask(index)}
                     disabled={subtasks.length === 1}
-                    className='h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-white/90'
+                    className='flex items-center justify-end p-0 hover:bg-transparent focus-visible:ring-0'
                   >
-                    <X className='h-4 w-4' />
+                    <Close size='72' className='text-[#828FA3]' />
                   </Button>
                 </div>
               ))}
@@ -205,7 +211,7 @@ export function CreateTaskDialog({
                 variant='ghost'
                 onClick={handleAddSubtask}
                 disabled={subtasks.length >= 6}
-                className='mt-1 w-full cursor-pointer rounded-full bg-[#635FC7]/10 py-4 text-[#635FC7] hover:bg-[#635FC7]/20 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:hover:bg-white/90'
+                className='mt-1 w-full cursor-pointer rounded-full bg-[#635FC7]/10 py-6 text-[#635FC7] hover:bg-[#635FC7]/20 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:hover:bg-white/90'
               >
                 <Plus className='mr-2 h-4 w-4' />
                 Add New Subtask {subtasks.length >= 6 && '(Max 6)'}
@@ -243,7 +249,7 @@ export function CreateTaskDialog({
             isCreatingTask ||
             isCreatingTaskWithSubtasks
           }
-          className='w-full rounded-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
+          className='w-full rounded-full bg-[#635FC7] py-6 text-white hover:bg-[#635FC7]/90'
         >
           {isCreatingTask || isCreatingTaskWithSubtasks ? (
             <div className='flex items-center gap-2'>

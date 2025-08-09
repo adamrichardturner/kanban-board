@@ -66,7 +66,7 @@ export function SettingsDropdown({ board }: SettingsDropdownProps) {
             <EllipsisVertical className='h-6 w-6 cursor-pointer text-[#828FA3]' />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end' className='w-48'>
+        <DropdownMenuContent align='end' sideOffset={16} className='w-48'>
           <DropdownMenuItem
             onClick={handleEditBoard}
             className='cursor-pointer'
@@ -104,7 +104,7 @@ export function SettingsDropdown({ board }: SettingsDropdownProps) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className='inset:4 rounded-lg sm:max-w-lg'>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Board</AlertDialogTitle>
             <AlertDialogDescription>

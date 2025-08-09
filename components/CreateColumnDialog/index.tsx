@@ -74,7 +74,7 @@ export function CreateColumnDialog({ trigger }: CreateColumnDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='inset:4 rounded-lg sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle>Add New Column</DialogTitle>
         </DialogHeader>

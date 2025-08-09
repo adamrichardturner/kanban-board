@@ -91,7 +91,7 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='inset:4 rounded-lg sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle>Add New Board</DialogTitle>
         </DialogHeader>

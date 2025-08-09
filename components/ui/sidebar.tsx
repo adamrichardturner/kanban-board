@@ -267,7 +267,7 @@ function SidebarTrigger({
       data-slot='sidebar-trigger'
       variant='ghost'
       className={cn(
-        'z-50 flex cursor-pointer items-center gap-2',
+        'z-50 flex hidden cursor-pointer items-center gap-2 md:flex',
         // Transition only specific properties, excluding colors
         'transition-[transform,opacity,width,height] duration-200',
         // When sidebar is closed (show button prominently)
@@ -297,7 +297,7 @@ function SidebarTrigger({
               type: 'spring',
               stiffness: 300,
             }}
-            className='flex items-center gap-3'
+            className='hidden items-center gap-3 md:flex'
           >
             <EyeOff
               size={48}

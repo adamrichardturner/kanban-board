@@ -123,7 +123,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
             <EllipsisVertical className='cursor-pointer text-[#828FA3]' />
           )}
         </DialogTrigger>
-        <DialogContent className='sm:max-w-md'>
+        <DialogContent className='inset:4 rounded-lg sm:max-w-lg'>
           <DialogHeader>
             <DialogTitle>Edit Board</DialogTitle>
           </DialogHeader>

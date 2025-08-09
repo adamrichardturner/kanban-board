@@ -30,7 +30,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className='dark:bg-dark-grey bg-white shadow-lg'
+      className='dark:bg-dark-grey hidden bg-white shadow-lg md:flex'
       variant='inset'
       collapsible='offcanvas'
     >

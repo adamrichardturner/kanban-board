@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+import Script from 'next/script';
 import { Providers } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -51,6 +52,29 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <body className={`${plusJakartaSans.className}`}>
+        <Script id='theme-init' strategy='beforeInteractive'>
+          {`
+            (function() {
+              try {
+                var stored = localStorage.getItem('theme');
+                var root = document.documentElement;
+                if (stored === 'dark') {
+                  root.classList.add('dark');
+                } else if (stored === 'light') {
+                  root.classList.remove('dark');
+                } else {
+                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    root.classList.add('dark');
+                  } else {
+                    root.classList.remove('dark');
+                  }
+                }
+              } catch (e) {
+                // no-op
+              }
+            })();
+          `}
+        </Script>
         <Providers>{children}</Providers>
         <Toaster />
       </body>

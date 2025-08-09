@@ -169,7 +169,7 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
           </div>
         )}
       </DialogTrigger>
-      <DialogContent className='max-h-[90vh] max-w-md overflow-y-auto sm:max-w-lg'>
+      <DialogContent className='inset:4 max-h-[90vh] max-w-md overflow-y-auto rounded-lg sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle className='text-lg font-bold text-[#000112]'>
             Edit Task
