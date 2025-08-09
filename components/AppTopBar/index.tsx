@@ -24,7 +24,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
 
   return (
     <div
-      className='flex h-[64px] items-center justify-between bg-white pt-1.5 pl-4 md:h-[90px] md:pr-4 md:pl-6 dark:bg-[#2B2C37]'
+      className='flex h-[64px] items-center justify-between bg-white pl-4 md:h-[90px] md:pr-4 md:pl-6 dark:bg-[#2B2C37]'
       style={{
         boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)',
       }}

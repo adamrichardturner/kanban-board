@@ -718,12 +718,6 @@ export function useTasks() {
     reorderTasks: (columnId: string, data: ReorderRequest) =>
       reorderTasksMutation.mutate({ columnId, data }),
 
-    moveTaskAsync: (taskId: string, data: MoveTaskRequest) =>
-      moveTaskMutation.mutateAsync({ taskId, data }),
-
-    reorderTasksAsync: (columnId: string, data: ReorderRequest) =>
-      reorderTasksMutation.mutateAsync({ columnId, data }),
-
     // Subtask actions
     createSubtask: (taskId: string, data: CreateSubtaskRequest) =>
       createSubtaskMutation.mutate({ taskId, data }),
