@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import Image from 'next/image';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
@@ -13,14 +14,18 @@ import { MobileMenu } from './MobileMenu';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AppTopBarProps {
-  name: string;
+  name?: string;
 }
 
-export function AppTopBar({ name }: AppTopBarProps) {
+export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
   const { open } = useSidebar();
   const { selectedBoard, selectedBoardId, todoColumnId, isLoadingSelection } =
     useSelectedBoard();
   const { theme } = useTheme();
+  const displayName = useMemo(
+    () => name ?? selectedBoard?.name ?? '',
+    [name, selectedBoard?.name],
+  );
 
   return (
     <div
@@ -87,7 +92,9 @@ export function AppTopBar({ name }: AppTopBarProps) {
                 aria-haspopup='dialog'
                 aria-expanded={popOpen}
               >
-                <h1 className='text-[18px] leading-none font-bold'>{name}</h1>
+                <h1 className='text-[18px] leading-none font-bold'>
+                  {displayName}
+                </h1>
                 {popOpen ? (
                   <ChevronUp className='h-4 w-4 text-[#635FC7]' />
                 ) : (
@@ -99,7 +106,7 @@ export function AppTopBar({ name }: AppTopBarProps) {
         </div>
 
         <h1 className='hidden text-[18px] leading-none font-bold md:block md:text-2xl'>
-          {name}
+          {displayName}
         </h1>
       </div>
 
@@ -112,4 +119,4 @@ export function AppTopBar({ name }: AppTopBarProps) {
       </div>
     </div>
   );
-}
+});

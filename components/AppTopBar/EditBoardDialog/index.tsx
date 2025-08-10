@@ -60,10 +60,8 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   };
 
   const handleRemoveColumn = (index: number) => {
-    if (columns.length > 1) {
-      // Prevent removing all columns
-      setColumns(columns.filter((_, i) => i !== index));
-    }
+    // Allow removing down to zero; backend will handle cascade deletes
+    setColumns(columns.filter((_, i) => i !== index));
   };
 
   const handleColumnNameChange = (index: number, value: string) => {
@@ -75,20 +73,19 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   const handleSubmit = () => {
     if (!boardName.trim()) return;
 
-    // Filter out empty column names
-    const validColumns = columns.filter((col) => col.name.trim());
-
-    if (validColumns.length === 0) return;
-
-    // Prepare update data
-    const updateData = {
-      name: boardName.trim(),
-      columns: validColumns.map((col, index) => ({
+    // Build payload with only non-empty column names; missing IDs imply deletion
+    const validColumns = columns
+      .filter((col) => col.name.trim())
+      .map((col, index) => ({
         id: col.id,
         name: col.name.trim(),
         position: index,
         isNew: col.isNew,
-      })),
+      }));
+
+    const updateData = {
+      name: boardName.trim(),
+      columns: validColumns,
     };
 
     updateBoard(board.id, updateData);
@@ -115,7 +112,23 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
         open={open}
         onOpenChange={(newOpen) => {
           setOpen(newOpen);
-          if (!newOpen) resetForm();
+          if (newOpen) {
+            // Initialize form values from current board when opening
+            setBoardName(board?.name || '');
+            const sortedColumns = [...(board?.columns || [])].sort(
+              (a, b) => a.position - b.position,
+            );
+            setColumns(
+              sortedColumns.map((col) => ({
+                id: col.id,
+                name: col.name,
+                position: col.position,
+              })),
+            );
+          } else {
+            // Reset on close
+            resetForm();
+          }
         }}
       >
         <DialogTrigger asChild>
@@ -186,11 +199,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
           <div className='flex flex-col gap-2'>
             <Button
               onClick={handleSubmit}
-              disabled={
-                !boardName.trim() ||
-                columns.filter((col) => col.name.trim()).length === 0 ||
-                isUpdating
-              }
+              disabled={!boardName.trim() || isUpdating}
               className='w-full bg-[#635FC7] text-white hover:bg-[#635FC7]/90'
             >
               {isUpdating ? (

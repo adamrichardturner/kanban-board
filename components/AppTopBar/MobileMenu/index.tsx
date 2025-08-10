@@ -79,6 +79,7 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                       width={16}
                       height={16}
                       className={isActive ? 'brightness-0 invert' : ''}
+                      priority
                     />
                     <span className='truncate'>{board.name}</span>
                   </Link>
@@ -104,6 +105,7 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                   alt='Create board'
                   width={16}
                   height={16}
+                  priority
                 />
                 <span className='truncate'>+ Create New Board</span>
               </button>
