@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EditTaskDialog } from '../Task/EditTaskDialog';
+import { toast } from 'sonner';
 
 interface TaskDetailsDialogProps {
   task: TaskWithSubtasks;
@@ -31,28 +32,48 @@ interface TaskDetailsDialogProps {
 export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(task.columnId);
+  const [optimisticSubtasks, setOptimisticSubtasks] = useState(task.subtasks);
 
   const { selectedBoard } = useSelectedBoard();
-  const { updateTask, updateSubtask } = useTasks();
+  const { updateTaskAsync, updateSubtaskAsync } = useTasks();
 
-  const handleSubtaskToggle = (subtaskId: string, currentStatus: boolean) => {
-    const newStatus = !currentStatus;
-    const updateData: UpdateSubtaskRequest = {
-      status: newStatus,
-    };
-    updateSubtask(subtaskId, updateData);
-  };
+  const completedSubtasks = useMemo(
+    () => optimisticSubtasks.filter((s) => s.status).length,
+    [optimisticSubtasks],
+  );
 
-  const handleStatusChange = (newColumnId: string) => {
-    if (newColumnId !== task.columnId) {
-      updateTask(task.id, { columnId: newColumnId });
-      setSelectedColumnId(newColumnId);
+  const handleSubtaskToggle = async (
+    subtaskId: string,
+    currentStatus: boolean,
+  ) => {
+    const previous = optimisticSubtasks;
+    const next = optimisticSubtasks.map((s) =>
+      s.id === subtaskId ? { ...s, status: !currentStatus } : s,
+    );
+    setOptimisticSubtasks(next);
+
+    try {
+      const updateData: UpdateSubtaskRequest = { status: !currentStatus };
+      await updateSubtaskAsync(subtaskId, updateData);
+    } catch (_e) {
+      setOptimisticSubtasks(previous);
+      toast.error('Failed to update subtask. Please try again.');
     }
   };
 
-  const completedSubtasks = task.subtasks.filter(
-    (subtask) => subtask.status,
-  ).length;
+  const handleStatusChange = async (newColumnId: string) => {
+    if (newColumnId === selectedColumnId) {
+      return;
+    }
+    const prev = selectedColumnId;
+    setSelectedColumnId(newColumnId);
+    try {
+      await updateTaskAsync(task.id, { columnId: newColumnId });
+    } catch (_e) {
+      setSelectedColumnId(prev);
+      toast.error('Failed to update task. Please try again.');
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -91,13 +112,13 @@ export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
           )}
 
           {/* Subtasks */}
-          {task.subtasks && task.subtasks.length > 0 && (
+          {optimisticSubtasks && optimisticSubtasks.length > 0 && (
             <div className='space-y-4'>
               <Label className='text-[12px] leading-[15px] font-bold tracking-[0.5px] text-[#828FA3]'>
-                Subtasks ({completedSubtasks} of {task.subtasks.length})
+                Subtasks ({completedSubtasks} of {optimisticSubtasks.length})
               </Label>
               <div className='space-y-2'>
-                {task.subtasks.map((subtask) => (
+                {optimisticSubtasks.map((subtask) => (
                   <div
                     key={subtask.id}
                     className='flex cursor-pointer items-center gap-4 rounded-[4px] bg-[#F4F7FD] p-3 transition-colors hover:bg-[#635FC7]/10 dark:bg-[#20212C]'

@@ -811,6 +811,8 @@ export function useTasks() {
       reorderTasksMutation.mutateAsync({ columnId, data }),
     moveTaskAsync: (taskId: string, data: MoveTaskRequest) =>
       moveTaskMutation.mutateAsync({ taskId, data }),
+    updateTaskAsync: (taskId: string, data: UpdateTaskRequest) =>
+      updateTaskMutation.mutateAsync({ taskId, data }),
 
     // Subtask actions
     createSubtask: (taskId: string, data: CreateSubtaskRequest) =>
@@ -821,6 +823,8 @@ export function useTasks() {
       deleteSubtaskMutation.mutate(subtaskId),
     reorderSubtasks: (taskId: string, data: ReorderRequest) =>
       reorderSubtasksMutation.mutate({ taskId, data }),
+    updateSubtaskAsync: (subtaskId: string, data: UpdateSubtaskRequest) =>
+      updateSubtaskMutation.mutateAsync({ subtaskId, data }),
 
     // Mutation states
     isCreatingTask: createTaskMutation.isPending,
