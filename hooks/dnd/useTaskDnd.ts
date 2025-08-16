@@ -55,11 +55,23 @@ export function useTaskDnd(initial: BoardWithColumns) {
       const overId = String(over.id);
       const from = findTask(board, activeId);
       const overTask = findTask(board, overId);
+      // Determine if pointer is below the halfway point of the hovered task
+      const activeTop = getRectTop(active.rect.current);
+      const isBelowOverItem = Boolean(
+        activeTop !== null &&
+          over.rect &&
+          activeTop > over.rect.top + over.rect.height / 2,
+      );
+
       if (from && overTask && from.colId === overTask.colId) {
-        if (from.index === overTask.index) return;
+        let targetIndex = overTask.index + (isBelowOverItem ? 1 : 0);
+        if (isBelowOverItem && from.index < overTask.index) {
+          targetIndex = targetIndex - 1;
+        }
+        if (from.index === targetIndex) return;
         const next = clone(board);
         const col = next.columns.find((c) => c.id === from.colId)!;
-        col.tasks = arrayMove(col.tasks, from.index, overTask.index);
+        col.tasks = arrayMove(col.tasks, from.index, targetIndex);
         col.tasks = normalize(col.tasks);
         setBoard(next);
         const req: ReorderRequest = {
@@ -75,7 +87,9 @@ export function useTaskDnd(initial: BoardWithColumns) {
       const sourceCol = next.columns.find((c) => c.id === source.colId)!;
       const [moved] = sourceCol.tasks.splice(source.index, 1);
       const targetCol = next.columns.find((c) => c.id === targetColId)!;
-      const insertIndex = overTask ? overTask.index : targetCol.tasks.length;
+      const insertIndex = overTask
+        ? overTask.index + (isBelowOverItem ? 1 : 0)
+        : targetCol.tasks.length;
       targetCol.tasks.splice(insertIndex, 0, moved);
       sourceCol.tasks = normalize(sourceCol.tasks);
       targetCol.tasks = normalize(targetCol.tasks);
@@ -112,6 +126,31 @@ function clone<T>(x: T): T {
 }
 function normalize<T extends { id: string; position: number }>(arr: T[]) {
   return arr.map((it, i) => ({ ...it, position: i + 1 }));
+}
+interface RectCoordinates {
+  top: number;
+  height?: number;
+}
+interface CompositeRect {
+  initial: RectCoordinates | null;
+  translated: RectCoordinates | null;
+}
+type RectLike = RectCoordinates | CompositeRect | null | undefined;
+
+function getRectTop(rect: RectLike): number | null {
+  if (!rect) {
+    return null;
+  }
+  if ('top' in rect) {
+    return rect.top;
+  }
+  if (rect.translated && 'top' in rect.translated) {
+    return rect.translated.top;
+  }
+  if (rect.initial && 'top' in rect.initial) {
+    return rect.initial.top;
+  }
+  return null;
 }
 function findTask(board: BoardWithColumns, taskId: string) {
   for (const col of board.columns) {
