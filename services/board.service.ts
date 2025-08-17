@@ -170,6 +170,7 @@ export class BoardService {
       id?: string;
       name: string;
       position: number;
+      color?: string;
       isNew?: boolean;
     }[],
   ): Promise<void> {
@@ -203,6 +204,7 @@ export class BoardService {
       if (col.id && !col.isNew) {
         await this.columnRepository.update(col.id, {
           name: col.name,
+          color: col.color,
           position: col.position + TEMP_OFFSET,
         });
       }
@@ -217,6 +219,7 @@ export class BoardService {
           boardId,
           col.name,
           col.position + TEMP_OFFSET,
+          col.color ?? '#3B82F6',
         );
         created.push({ tempId: createdCol.id, finalPosition: col.position });
         // Update normalized entry id so phase 2 can move it to final position
@@ -231,6 +234,7 @@ export class BoardService {
       }
       await this.columnRepository.update(col.id, {
         position: col.position,
+        color: col.color,
       });
     }
   }

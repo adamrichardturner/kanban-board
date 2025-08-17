@@ -11,6 +11,7 @@ import { TaskDragOverlay } from '@/components/dnd/TaskDragOverlay';
 import { DroppableColumn } from '@/components/dnd/DroppableColumn';
 import type { BoardWithColumns } from '@/types';
 import { DragDropProvider } from '@/components/dnd/DragAndDropProvider';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ClientBoardPage({ boardId }: { boardId: string }) {
   const { data: board, isLoading, error } = useBoard(boardId);
@@ -32,25 +33,23 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
 
   const scrollAreaWidth = getScrollAreaWidth(isMobile, sidebarOpen);
   function getScrollAreaWidth(isMobile: boolean, sidebarOpen: boolean) {
-    if (isMobile) return 'calc(100vw)';
-    if (sidebarOpen) return 'calc(100vw - 300px - 3rem)';
+    if (isMobile) {
+      return 'calc(100vw)';
+    }
+    if (sidebarOpen) {
+      return 'calc(100vw - 300px - 3rem)';
+    }
     return 'calc(100vw - 3rem)';
   }
 
-  if (isLoading) {
-    return <BoardSkeleton />;
+  if (isLoading || !board) {
+    return null;
   }
+
   if (error) {
     return (
-      <div className='flex h-64 items-center justify-center bg-white dark:bg-[#20212C]'>
+      <div className='flex h-screen items-center justify-center bg-white dark:bg-[#20212C]'>
         <div className='text-red-500'>Error: {error.message}</div>
-      </div>
-    );
-  }
-  if (!board) {
-    return (
-      <div className='flex h-64 items-center justify-center bg-white dark:bg-[#20212C]'>
-        <div>Board not found</div>
       </div>
     );
   }
@@ -99,7 +98,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
                 />
               }
             >
-              <div className='flex w-max gap-2 pt-2 pb-4'>
+              <div className='ml-2 flex w-max gap-2 pt-2 pb-4'>
                 {dnd.board.columns.map((column) => (
                   <DroppableColumn
                     key={column.id}
@@ -159,43 +158,49 @@ function findTaskColumnId(
 
 function BoardSkeleton() {
   return (
-    <div className='animate-pulse'>
+    <div className='mt-8 ml-4 animate-pulse'>
+      {/* Top bar skeleton to match layout height and shadow */}
       <div
-        className='flex h-[90px] items-center justify-between bg-white px-4 pt-1.5 dark:bg-[#20212C]'
+        className='flex h-[90px] items-center justify-between bg-white px-6 dark:bg-[#20212C]'
         style={{ boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)' }}
       >
-        <div></div>
+        <Skeleton className='h-6 w-40 rounded-md' />
         <div className='flex items-center gap-4'>
-          <div className='h-10 w-32 rounded-md bg-gray-200 dark:bg-[#2B2C37]'></div>
-          <div className='h-10 w-28 rounded-md bg-gray-200 dark:bg-[#2B2C37]'></div>
+          <Skeleton className='h-10 w-28 rounded-md' />
+          <Skeleton className='h-10 w-28 rounded-md' />
         </div>
       </div>
+
+      {/* Columns wrapper matching real board spacing */}
       <div className='flex gap-6 overflow-x-auto p-6'>
         {[
+          { tasks: 5, headerWidth: 'w-24' },
+          { tasks: 3, headerWidth: 'w-28' },
           { tasks: 4, headerWidth: 'w-20' },
-          { tasks: 2, headerWidth: 'w-24' },
-          { tasks: 3, headerWidth: 'w-16' },
         ].map((column, i) => (
-          <div key={i} className='w-80 flex-shrink-0'>
+          <div key={i} className='w-80 flex-shrink-0 rounded-md p-1'>
+            {/* Column header */}
             <div className='mb-6 flex items-center gap-3'>
-              <div className='h-4 w-4 rounded-full bg-gray-300 dark:bg-[#6B7280]'></div>
-              <div
-                className={`h-3 ${column.headerWidth} rounded-md bg-gray-200 dark:bg-[#3E4050]`}
-              ></div>
+              <Skeleton className='h-4 w-4 rounded-full' />
+              <Skeleton className={`h-3 ${column.headerWidth} rounded-md`} />
             </div>
-            <div className='space-y-3'>
+
+            {/* Tasks list spacing should match space-y-6 */}
+            <div className='space-y-6'>
               {Array.from({ length: column.tasks }).map((_, j) => (
                 <div
                   key={j}
                   className='rounded-lg border-none bg-white p-4 dark:bg-[#2B2C37]'
                   style={{ boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)' }}
                 >
-                  <div
-                    className={`mb-3 h-4 ${j % 2 === 0 ? 'w-3/4' : 'w-5/6'} rounded-md bg-gray-200 dark:bg-[#3E4050]`}
-                  ></div>
-                  <div
-                    className={`h-3 ${j % 3 === 0 ? 'w-1/2' : 'w-2/3'} rounded-md bg-gray-100 dark:bg-[#3E4050]`}
-                  ></div>
+                  {/* Title line */}
+                  <Skeleton
+                    className={`mb-3 h-4 ${j % 2 === 0 ? 'w-3/4' : 'w-5/6'} rounded-md`}
+                  />
+                  {/* Subtasks count line */}
+                  <Skeleton
+                    className={`h-3 ${j % 3 === 0 ? 'w-1/2' : 'w-2/3'} rounded-md`}
+                  />
                 </div>
               ))}
             </div>

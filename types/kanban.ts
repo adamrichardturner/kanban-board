@@ -26,6 +26,7 @@ export interface UpdateBoardRequest {
     id?: string;
     name: string;
     position: number;
+    color?: string;
     isNew?: boolean;
   }[];
 }
@@ -119,6 +120,7 @@ export interface UpdateBoardRequest {
     id?: string; // undefined for new columns
     name: string;
     position: number;
+    color?: string;
     isNew?: boolean; // flag to indicate new columns
   }[];
 }

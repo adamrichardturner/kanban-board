@@ -14,6 +14,11 @@ import { Reorder, useDragControls } from 'framer-motion';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { BoardWithColumns } from '@/types';
 import Image from 'next/image';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface EditBoardDialogProps {
   board?: BoardWithColumns | null;
@@ -25,6 +30,7 @@ interface ColumnData {
   name: string;
   position: number;
   isNew?: boolean;
+  color?: string;
 }
 
 export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
@@ -35,6 +41,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
       id: col.id,
       name: col.name,
       position: col.position,
+      color: col.color,
     })) || [],
   );
 
@@ -81,6 +88,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
         id: col.id,
         name: col.name.trim(),
         position: index,
+        color: col.color,
         isNew: col.isNew,
       }));
 
@@ -124,6 +132,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                 id: col.id,
                 name: col.name,
                 position: col.position,
+                color: col.color,
               })),
             );
           } else {
@@ -171,6 +180,11 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                     index={index}
                     onNameChange={handleColumnNameChange}
                     onRemove={handleRemoveColumn}
+                    onColorChange={(idx, color) => {
+                      const next = [...columns];
+                      next[idx] = { ...next[idx], color };
+                      setColumns(next);
+                    }}
                   />
                 ))}
               </Reorder.Group>
@@ -223,11 +237,19 @@ function ReorderableColumnRow({
   index,
   onNameChange,
   onRemove,
+  onColorChange,
 }: {
-  column: { id?: string; name: string; position: number; isNew?: boolean };
+  column: {
+    id?: string;
+    name: string;
+    position: number;
+    isNew?: boolean;
+    color?: string;
+  };
   index: number;
   onNameChange: (index: number, value: string) => void;
   onRemove: (index: number) => void;
+  onColorChange: (index: number, color: string) => void;
 }) {
   const controls = useDragControls();
   return (
@@ -245,6 +267,57 @@ function ReorderableColumnRow({
       >
         <GripVertical className='h-4 w-4' />
       </button>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type='button'
+            className='h-9 w-9 rounded-md border border-gray-200'
+            style={{ backgroundColor: column.color ?? '#635FC7' }}
+            aria-label='Pick column color'
+            title='Pick column color'
+          />
+        </PopoverTrigger>
+        <PopoverContent className='w-64' align='start'>
+          <Label className='mb-2 block text-xs text-[#828FA3]'>
+            Column color
+          </Label>
+          <div className='grid grid-cols-6 gap-2'>
+            {[
+              '#635FC7',
+              '#FF6B6B',
+              '#4ECDC4',
+              '#45B7D1',
+              '#96CEB4',
+              '#FFEAA7',
+              '#DDA0DD',
+              '#98D8C8',
+              '#F7DC6F',
+              '#BB8FCE',
+              '#85C1E9',
+              '#82E0AA',
+            ].map((c) => (
+              <button
+                key={c}
+                type='button'
+                className='h-7 w-7 rounded-md border'
+                style={{ backgroundColor: c }}
+                onClick={() => onColorChange(index, c)}
+                aria-label={`Select ${c}`}
+                title={c}
+              />
+            ))}
+          </div>
+          <div className='mt-3 flex items-center gap-2'>
+            <Label className='text-xs text-[#828FA3]'>Custom:</Label>
+            <input
+              type='color'
+              value={column.color ?? '#635FC7'}
+              onChange={(e) => onColorChange(index, e.target.value)}
+              className='h-8 w-10 cursor-pointer rounded border border-gray-200 p-0'
+            />
+          </div>
+        </PopoverContent>
+      </Popover>
       <Input
         placeholder='e.g. Todo'
         value={column.name}

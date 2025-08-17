@@ -15,6 +15,7 @@ import {
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
@@ -22,11 +23,17 @@ import LoadingSpinner from '@/public/spinner.svg';
 import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from 'next-themes';
+import { Button } from '../ui/button';
 
 export function AppSidebar() {
   const { boards, isLoading } = useBoards();
   const { selectedBoardId } = useSelectedBoard();
   const { theme } = useTheme();
+  const router = useRouter();
+
+  const handleLogoClick = () => {
+    router.refresh();
+  };
 
   return (
     <Sidebar
@@ -36,7 +43,12 @@ export function AppSidebar() {
     >
       <SidebarHeader className='pb-[32px]'>
         <div className='p-4'>
-          <Link href='/boards' className='flex items-center gap-2'>
+          <Button
+            type='button'
+            variant='ghost'
+            onClick={handleLogoClick}
+            className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
+          >
             <Image
               src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
               alt='Kanban Board Logo'
@@ -44,7 +56,7 @@ export function AppSidebar() {
               style={{ width: 'auto', height: '26px' }}
               priority
             />
-          </Link>
+          </Button>
         </div>
       </SidebarHeader>
 
@@ -63,7 +75,7 @@ export function AppSidebar() {
                       className={`${
                         selectedBoardId === board.id
                           ? 'min-h-[48px] max-w-[276px] rounded-l-none rounded-r-full bg-[#635FC7] pl-[32px] font-semibold text-white hover:bg-[#635FC7] hover:text-white focus:bg-[#635FC7] focus:text-white active:bg-[#635FC7] active:text-white'
-                          : 'min-h-[48px] pl-[32px] font-semibold text-[#828FA3] focus-within:text-[#828FA3] hover:bg-transparent hover:text-[#828FA3] focus:bg-transparent focus:text-[#828FA3] active:bg-transparent active:text-[#828FA3]'
+                          : 'min-h-[48px] pl-[32px] font-semibold text-[#828FA3] focus-within:text-[#828FA3] hover:bg-transparent hover:text-[#828FA3] focus:bg-transparent focus:text-[#828FA3] active:bg-transparent active:text-[#828FA3] dark:hover:bg-transparent'
                       }`}
                     >
                       <Link
@@ -91,7 +103,7 @@ export function AppSidebar() {
                     trigger={
                       <SidebarMenuButton
                         asChild
-                        className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:bg-transparent hover:text-[#635FC7] focus:bg-transparent focus:text-[#635FC7] active:bg-transparent active:text-[#635FC7]'
+                        className='min-h-[48px] cursor-pointer gap-4 pl-[32px] font-semibold text-[#635FC7] focus-within:text-[#635FC7] hover:bg-transparent hover:text-[#635FC7] focus:bg-transparent focus:text-[#635FC7] active:bg-transparent active:text-[#635FC7] dark:hover:bg-transparent'
                       >
                         <div className='flex w-full items-center gap-4'>
                           <Image

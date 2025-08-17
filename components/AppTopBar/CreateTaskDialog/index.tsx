@@ -199,7 +199,7 @@ export function CreateTaskDialog({
                     size='icon'
                     onClick={() => handleRemoveSubtask(index)}
                     disabled={subtasks.length === 1}
-                    className='flex items-center justify-end p-0 hover:bg-transparent focus-visible:ring-0'
+                    className='flex items-center justify-end p-0 hover:bg-transparent focus-visible:ring-0 dark:hover:bg-transparent'
                   >
                     <Close size='72' className='text-[#828FA3]' />
                   </Button>

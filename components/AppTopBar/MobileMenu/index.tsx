@@ -70,7 +70,7 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                     className={
                       isActive
                         ? 'flex w-[90%] items-center gap-3 rounded-r-full bg-[#635FC7] px-6 py-3 font-semibold text-white'
-                        : 'flex w-full items-center gap-3 rounded-md px-6 py-3 font-semibold text-[#828FA3] hover:bg-transparent hover:text-[#828FA3]'
+                        : 'flex w-full items-center gap-3 rounded-md px-6 py-3 font-semibold text-[#828FA3] hover:bg-transparent hover:text-[#828FA3] dark:hover:bg-transparent'
                     }
                   >
                     <Image
@@ -98,7 +98,7 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                   );
                   button?.click();
                 }}
-                className='flex w-full items-center gap-3 rounded-md px-6 py-3 font-semibold text-[#635FC7] hover:bg-transparent hover:text-[#635FC7]'
+                className='flex w-full items-center gap-3 rounded-md px-6 py-3 font-semibold text-[#635FC7] hover:bg-transparent hover:text-[#635FC7] dark:hover:bg-transparent'
               >
                 <Image
                   src='/boards/board-icon-create.svg'

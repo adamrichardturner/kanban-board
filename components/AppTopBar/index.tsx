@@ -6,12 +6,13 @@ import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import KanBanLogoMobile from '@/public/logo/kanban-board-logo-mobile.svg';
 import { useSidebar } from '../ui/sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { SettingsDropdown } from './SettingsDropdown';
 import { useTheme } from 'next-themes';
 import { MobileMenu } from './MobileMenu';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface AppTopBarProps {
   name?: string;
@@ -22,10 +23,15 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
   const { selectedBoard, selectedBoardId, todoColumnId, isLoadingSelection } =
     useSelectedBoard();
   const { theme } = useTheme();
+  const router = useRouter();
   const displayName = useMemo(
     () => name ?? selectedBoard?.name ?? '',
     [name, selectedBoard?.name],
   );
+
+  const handleLogoClick = () => {
+    router.refresh();
+  };
 
   return (
     <div
@@ -50,7 +56,12 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
               }}
               className='pl-3'
             >
-              <Link href='/boards' className='flex items-center gap-2'>
+              <Button
+                type='button'
+                variant='ghost'
+                onClick={handleLogoClick}
+                className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
+              >
                 <Image
                   src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
                   alt='Kanban Board Logo'
@@ -58,11 +69,16 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                   style={{ width: 'auto', height: '26px' }}
                   priority
                 />
-              </Link>
+              </Button>
             </motion.div>
           ) : (
             <div key='logo-mobile' className='flex pr-6 md:hidden'>
-              <Link href='/boards' className='flex items-center gap-2'>
+              <Button
+                type='button'
+                variant='ghost'
+                onClick={handleLogoClick}
+                className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
+              >
                 <Image
                   src={KanBanLogoMobile}
                   alt='Kanban Board Logo'
@@ -70,7 +86,7 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                   style={{ width: 'auto', height: '26px' }}
                   priority
                 />
-              </Link>
+              </Button>
             </div>
           )}
         </AnimatePresence>
