@@ -1,7 +1,8 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { AuthUser, AuthResponse, ApiResponse, BoardResponse } from '@/types';
 import { toast } from 'sonner';
 
@@ -64,7 +65,9 @@ export function usePostLoginRoute(enabledOverride?: boolean) {
 
 export function useAuth() {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
   const loginMutation = useMutation<AuthResponse, Error, void>({
     mutationFn: async () => {
@@ -89,6 +92,7 @@ export function useAuth() {
 
       // Get the route (it will be cached from the invalidation above)
       const route = await fetchPostLoginRoute();
+      setNavigatingTo(route);
       router.push(route);
       toast.success(`${user.fullName} logged in successfully!`);
     },
@@ -133,7 +137,10 @@ export function useAuth() {
     user: user || null,
     isAuthenticated: !!user,
     isLoading:
-      userLoading || loginMutation.isPending || logoutMutation.isPending,
+      userLoading ||
+      loginMutation.isPending ||
+      logoutMutation.isPending ||
+      Boolean(navigatingTo),
     error:
       userError?.message ||
       loginMutation.error?.message ||
