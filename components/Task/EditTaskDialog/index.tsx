@@ -142,8 +142,8 @@ export function EditTaskDialog({ task, trigger }: EditTaskDialogProps) {
       }
     }
 
-    // Reset form and close dialog
-    setOpen(false);
+    // Close after a brief tick to allow query invalidations to propagate
+    setTimeout(() => setOpen(false), 50);
   };
 
   const isLoading =

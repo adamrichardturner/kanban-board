@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -29,13 +29,38 @@ interface TaskDetailsDialogProps {
   trigger?: React.ReactNode;
 }
 
+type MinimalSubtask = { id: string; title: string; status: boolean };
+
 export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(task.columnId);
-  const [optimisticSubtasks, setOptimisticSubtasks] = useState(task.subtasks);
+  const [optimisticSubtasks, setOptimisticSubtasks] = useState<
+    MinimalSubtask[]
+  >(toMinimal(task.subtasks));
 
   const { selectedBoard } = useSelectedBoard();
-  const { updateTaskAsync, updateSubtaskAsync } = useTasks();
+  const { updateTaskAsync, updateSubtaskAsync, useTaskQuery } = useTasks();
+  const { data: freshTask } = useTaskQuery(task.id);
+
+  // Sync when dialog opens or when fresh task data arrives
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    if (freshTask) {
+      setSelectedColumnId(freshTask.columnId);
+      setOptimisticSubtasks(toMinimal(freshTask.subtasks || []));
+      return;
+    }
+    setSelectedColumnId(task.columnId);
+    setOptimisticSubtasks(toMinimal(task.subtasks));
+  }, [open, freshTask, task.columnId, task.subtasks]);
+
+  function toMinimal<T extends { id: string; title: string; status: boolean }>(
+    arr: T[],
+  ): MinimalSubtask[] {
+    return arr.map((s) => ({ id: s.id, title: s.title, status: s.status }));
+  }
 
   const completedSubtasks = useMemo(
     () => optimisticSubtasks.filter((s) => s.status).length,
