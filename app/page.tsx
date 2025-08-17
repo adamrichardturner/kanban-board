@@ -6,6 +6,7 @@ import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
+import Spinner from '@/public/spinner.svg';
 
 export default function Home() {
   const { isLoading, handleDemoLogin } = useAuth();
@@ -45,10 +46,10 @@ export default function Home() {
             disabled={isLoading}
             className='transform bg-blue-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
           >
-            {isLoading ? (
+            {!isLoading ? (
               <div className='flex items-center gap-2'>
                 <Image
-                  src='/spinner.svg'
+                  src={Spinner}
                   alt='Loading...'
                   width={16}
                   height={16}
