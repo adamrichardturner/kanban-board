@@ -69,6 +69,16 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
+  // Clear navigating flag when we arrive at the destination
+  useEffect(() => {
+    if (!navigatingTo || !pathname) {
+      return;
+    }
+    if (pathname === navigatingTo || pathname.startsWith(navigatingTo)) {
+      setNavigatingTo(null);
+    }
+  }, [pathname, navigatingTo]);
+
   const loginMutation = useMutation<AuthResponse, Error, void>({
     mutationFn: async () => {
       const res = await fetch('/api/auth/demo-login', {
@@ -148,7 +158,7 @@ export function useAuth() {
       null,
     handleDemoLogin: () => loginMutation.mutate(),
     logout: () => logoutMutation.mutate(),
-    isLoginLoading: loginMutation.isPending,
+    isLoginLoading: loginMutation.isPending || Boolean(navigatingTo),
     isLogoutLoading: logoutMutation.isPending,
     loginError: loginMutation.error?.message || null,
     logoutError: logoutMutation.error?.message || null,

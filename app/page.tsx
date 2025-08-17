@@ -9,7 +9,7 @@ import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import Spinner from '@/public/spinner.svg';
 
 export default function Home() {
-  const { isLoading, handleDemoLogin } = useAuth();
+  const { isLoginLoading, handleDemoLogin } = useAuth();
 
   return (
     <div className='grid min-h-screen items-center justify-items-center bg-gradient-to-br from-slate-50 to-slate-100 font-sans dark:from-slate-900 dark:to-slate-800'>
@@ -43,10 +43,10 @@ export default function Home() {
         <div className='mt-8 flex flex-col gap-4 sm:flex-row'>
           <Button
             onClick={handleDemoLogin}
-            disabled={isLoading}
+            disabled={isLoginLoading}
             className='transform bg-blue-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
           >
-            {isLoading ? (
+            {isLoginLoading ? (
               <div className='flex items-center gap-2'>
                 <Image
                   src={Spinner}
