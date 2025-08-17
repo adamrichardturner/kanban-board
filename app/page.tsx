@@ -46,7 +46,7 @@ export default function Home() {
             disabled={isLoading}
             className='transform bg-blue-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
           >
-            {!isLoading ? (
+            {isLoading ? (
               <div className='flex items-center gap-2'>
                 <Image
                   src={Spinner}
