@@ -173,37 +173,65 @@ export class BoardService {
       isNew?: boolean;
     }[],
   ): Promise<void> {
-    // Get existing columns
+    // Normalize final positions to be 0..n based on input order, to be safe
+    const normalized = columnsData.map((c, index) => ({
+      ...c,
+      position: index,
+    }));
+
+    // Fetch existing columns and determine which to delete
     const existingColumns = await this.columnRepository.findByBoardId(boardId);
     const existingColumnIds = existingColumns.map((col) => col.id);
-    const providedColumnIds = columnsData
+    const providedExistingIds = normalized
       .filter((col) => col.id && !col.isNew)
-      .map((col) => col.id!);
+      .map((col) => col.id!)
+      .filter(Boolean);
 
-    // Delete columns that are no longer in the update
-    const columnsToDelete = existingColumnIds.filter(
-      (id) => !providedColumnIds.includes(id),
+    // Delete removed columns first to avoid collisions
+    const toDelete = existingColumnIds.filter(
+      (id) => !providedExistingIds.includes(id),
     );
-    for (const columnId of columnsToDelete) {
+    for (const columnId of toDelete) {
       await this.columnRepository.delete(columnId);
     }
 
-    // Update or create columns
-    for (const columnData of columnsData) {
-      if (columnData.id && !columnData.isNew) {
-        // Update existing column
-        await this.columnRepository.update(columnData.id, {
-          name: columnData.name,
-          position: columnData.position,
+    // Two-phase position assignment to avoid unique (board_id, position) conflicts
+    const TEMP_OFFSET = 1000;
+
+    // Phase 1: move all existing columns that remain to temporary unique positions and update names
+    for (const col of normalized) {
+      if (col.id && !col.isNew) {
+        await this.columnRepository.update(col.id, {
+          name: col.name,
+          position: col.position + TEMP_OFFSET,
         });
-      } else {
-        // Create new column
-        await this.columnRepository.create(
-          boardId,
-          columnData.name,
-          columnData.position,
-        );
       }
+    }
+
+    // Phase 1 (new): create new columns at temporary unique positions
+    // Keep track of created IDs so we can move them in phase 2
+    const created: { tempId: string; finalPosition: number }[] = [];
+    for (const col of normalized) {
+      if (!col.id || col.isNew) {
+        const createdCol = await this.columnRepository.create(
+          boardId,
+          col.name,
+          col.position + TEMP_OFFSET,
+        );
+        created.push({ tempId: createdCol.id, finalPosition: col.position });
+        // Update normalized entry id so phase 2 can move it to final position
+        col.id = createdCol.id;
+      }
+    }
+
+    // Phase 2: move all columns (existing and newly created) to their final positions
+    for (const col of normalized) {
+      if (!col.id) {
+        continue;
+      }
+      await this.columnRepository.update(col.id, {
+        position: col.position,
+      });
     }
   }
 

@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus, EllipsisVertical, Trash2 } from 'lucide-react';
+import { X, Plus, EllipsisVertical, Trash2, GripVertical } from 'lucide-react';
+import { Reorder, useDragControls } from 'framer-motion';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { BoardWithColumns } from '@/types';
 import Image from 'next/image';
@@ -157,41 +158,33 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
             {/* Board Columns */}
             <div className='space-y-2'>
               <Label>Board Columns</Label>
-              <div className='space-y-2'>
+              <Reorder.Group
+                axis='y'
+                values={columns}
+                onReorder={setColumns}
+                className='space-y-2'
+              >
                 {columns.map((column, index) => (
-                  <div key={index} className='flex items-center gap-2'>
-                    <Input
-                      placeholder='e.g. Todo'
-                      value={column.name}
-                      onChange={(e) =>
-                        handleColumnNameChange(index, e.target.value)
-                      }
-                      className='flex-1'
-                    />
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => handleRemoveColumn(index)}
-                      disabled={columns.length === 1}
-                      className='h-10 w-10 p-0 hover:bg-gray-100'
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  </div>
+                  <ReorderableColumnRow
+                    key={column.id ?? `new-${index}-${column.position}`}
+                    column={column}
+                    index={index}
+                    onNameChange={handleColumnNameChange}
+                    onRemove={handleRemoveColumn}
+                  />
                 ))}
+              </Reorder.Group>
 
-                <Button
-                  type='button'
-                  variant='ghost'
-                  onClick={handleAddColumn}
-                  disabled={columns.length >= 6}
-                  className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  <Plus className='mr-2 h-4 w-4' />
-                  Add New Column {columns.length >= 6 && '(Max 6)'}
-                </Button>
-              </div>
+              <Button
+                type='button'
+                variant='ghost'
+                onClick={handleAddColumn}
+                disabled={columns.length >= 6}
+                className='w-full text-[#635FC7] hover:bg-[#635FC7]/10 hover:text-[#635FC7] disabled:cursor-not-allowed disabled:opacity-50'
+              >
+                <Plus className='mr-2 h-4 w-4' />
+                Add New Column {columns.length >= 6 && '(Max 6)'}
+              </Button>
             </div>
           </div>
 
@@ -222,5 +215,51 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function ReorderableColumnRow({
+  column,
+  index,
+  onNameChange,
+  onRemove,
+}: {
+  column: { id?: string; name: string; position: number; isNew?: boolean };
+  index: number;
+  onNameChange: (index: number, value: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item
+      value={column}
+      dragListener={false}
+      dragControls={controls}
+      className='flex items-center gap-2'
+    >
+      <button
+        type='button'
+        onPointerDown={(e) => controls.start(e)}
+        className='h-10 w-8 cursor-grab text-[#828FA3] hover:text-[#635FC7]'
+        aria-label='Drag column'
+      >
+        <GripVertical className='h-4 w-4' />
+      </button>
+      <Input
+        placeholder='e.g. Todo'
+        value={column.name}
+        onChange={(e) => onNameChange(index, e.target.value)}
+        className='flex-1'
+      />
+      <Button
+        type='button'
+        variant='ghost'
+        size='sm'
+        onClick={() => onRemove(index)}
+        className='h-10 w-10 p-0 hover:bg-gray-100'
+      >
+        <X className='h-4 w-4' />
+      </Button>
+    </Reorder.Item>
   );
 }

@@ -62,7 +62,10 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
         className='flex-1 overflow-hidden p-3 md:p-6'
         style={{ animation: 'fadeIn 0.3s ease-in-out' }}
       >
-        <ScrollArea className='h-full' style={{ width: scrollAreaWidth }}>
+        <ScrollArea
+          className='h-full'
+          style={{ width: scrollAreaWidth, paddingTop: '20px' }}
+        >
           {dnd.board.columns.length === 0 ? (
             <div className='flex h-[calc(100vh-150px)] w-full items-center justify-center'>
               <div className='flex flex-col items-center gap-6 text-center'>
@@ -96,7 +99,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
                 />
               }
             >
-              <div className='flex w-max gap-2 pb-4'>
+              <div className='flex w-max gap-2 pt-2 pb-4'>
                 {dnd.board.columns.map((column) => (
                   <DroppableColumn
                     key={column.id}
