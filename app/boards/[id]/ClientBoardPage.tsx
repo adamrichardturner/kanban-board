@@ -62,7 +62,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
         style={{ animation: 'fadeIn 0.3s ease-in-out' }}
       >
         <ScrollArea
-          className='h-full'
+          className='h-full md:touch-auto'
           style={{ width: scrollAreaWidth, paddingTop: '20px' }}
         >
           {dnd.board.columns.length === 0 ? (
