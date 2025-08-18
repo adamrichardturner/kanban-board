@@ -8,24 +8,33 @@ import Link from 'next/link';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
 import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import Spinner from '@/public/spinner.svg';
-import { useTheme } from 'next-themes';
 
 export default function Home() {
   const { isLoginLoading, handleDemoLogin } = useAuth();
-  const { theme } = useTheme();
 
   return (
     <div className='grid min-h-screen items-center justify-items-center bg-gradient-to-br from-slate-50 to-slate-100 font-sans dark:from-slate-900 dark:to-slate-800'>
       <main className='mx-auto flex max-w-2xl flex-col items-center justify-center gap-8 px-6 py-8 text-center'>
         {/* Logo */}
         <div className='mb-4'>
-          <Image
-            src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
-            alt='Kanban Board Logo'
-            width={200}
-            height={33}
-            priority
-          />
+          <>
+            <Image
+              src={KanBanLogo}
+              alt='Kanban Board Logo'
+              width={200}
+              height={33}
+              priority
+              className='block dark:hidden'
+            />
+            <Image
+              src={KanBanLogoDark}
+              alt='Kanban Board Logo'
+              width={200}
+              height={33}
+              priority
+              className='hidden dark:block'
+            />
+          </>
         </div>
 
         {/* Hero Content */}

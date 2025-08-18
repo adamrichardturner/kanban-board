@@ -389,7 +389,10 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='sidebar-header'
       data-sidebar='header'
-      className={cn('flex flex-col pt-[18px] pl-[18px]', className)}
+      className={cn(
+        'flex h-[64px] flex-col items-start justify-center p-0 md:h-[90px]',
+        className,
+      )}
       {...props}
     />
   );

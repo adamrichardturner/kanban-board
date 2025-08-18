@@ -44,8 +44,8 @@ export function AppSidebar() {
       variant='inset'
       collapsible='offcanvas'
     >
-      <SidebarHeader className='pb-[32px]'>
-        <div className='p-4'>
+      <SidebarHeader className='pl-[16px]'>
+        <div className='flex flex-1 items-center'>
           <Button
             type='button'
             variant='ghost'
@@ -53,11 +53,20 @@ export function AppSidebar() {
             className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
           >
             <Image
-              src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
+              src={KanBanLogo}
               alt='Kanban Board Logo'
               height={26}
               style={{ width: 'auto', height: '26px' }}
               priority
+              className='block dark:hidden'
+            />
+            <Image
+              src={KanBanLogoDark}
+              alt='Kanban Board Logo'
+              height={26}
+              style={{ width: 'auto', height: '26px' }}
+              priority
+              className='hidden dark:block'
             />
           </Button>
         </div>
@@ -66,10 +75,10 @@ export function AppSidebar() {
       <SidebarContent className='w-[300px] flex-shrink-0'>
         {!loading ? (
           <SidebarGroup>
-            <SidebarGroupLabel className='semibold pb-[20px] pl-[32px] text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
+            <SidebarGroupLabel className='semibold py-[42px] pl-[32px] text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
               All Boards ({boards.length})
             </SidebarGroupLabel>
-            <SidebarGroupContent>
+            <SidebarGroupContent className='pt-[0px]'>
               <SidebarMenu>
                 {boards.map((board) => (
                   <SidebarMenuItem key={board.id}>

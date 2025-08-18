@@ -48,7 +48,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
     <div className='flex h-screen flex-col overflow-hidden bg-white dark:bg-[#20212C]'>
       <AppTopBar name={board?.name ?? ''} />
       <div
-        className='flex-1 overflow-hidden p-3 md:p-6'
+        className='mt-4 flex-1 overflow-hidden'
         style={{ animation: 'fadeIn 0.3s ease-in-out' }}
       >
         {showLoading ? (
@@ -56,7 +56,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
         ) : (
           <ScrollArea
             className='h-full md:touch-auto'
-            style={{ width: scrollAreaWidth, paddingTop: '20px' }}
+            style={{ width: scrollAreaWidth }}
           >
             {dnd.board.columns.length === 0 ? (
               <div className='flex h-[calc(100vh-150px)] w-full items-center justify-center'>
@@ -91,7 +91,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
                   />
                 }
               >
-                <div className='ml-2 flex w-max gap-2 pt-2 pb-4'>
+                <div className='mt-2 ml-2 flex w-max gap-2 pb-4'>
                   {dnd.board.columns.map((column) => (
                     <DroppableColumn
                       key={column.id}
