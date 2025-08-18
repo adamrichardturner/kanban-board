@@ -6,19 +6,21 @@ import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
+import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import Spinner from '@/public/spinner.svg';
+import { useTheme } from 'next-themes';
 
 export default function Home() {
   const { isLoginLoading, handleDemoLogin } = useAuth();
+  const { theme } = useTheme();
 
   return (
     <div className='grid min-h-screen items-center justify-items-center bg-gradient-to-br from-slate-50 to-slate-100 font-sans dark:from-slate-900 dark:to-slate-800'>
-      <main className='mx-auto flex max-w-2xl flex-col items-center justify-center gap-8 px-6 text-center'>
+      <main className='mx-auto flex max-w-2xl flex-col items-center justify-center gap-8 px-6 py-8 text-center'>
         {/* Logo */}
         <div className='mb-4'>
           <Image
-            className='dark:invert'
-            src={KanBanLogo}
+            src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
             alt='Kanban Board Logo'
             width={200}
             height={33}
@@ -44,7 +46,7 @@ export default function Home() {
           <Button
             onClick={handleDemoLogin}
             disabled={isLoginLoading}
-            className='transform bg-blue-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
+            className='transform bg-blue-600 px-8 py-6 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700 hover:shadow-xl'
           >
             {isLoginLoading ? (
               <div className='flex items-center gap-2'>
@@ -64,14 +66,6 @@ export default function Home() {
                 Try Demo Account
               </div>
             )}
-          </Button>
-
-          <Button
-            variant='outline'
-            asChild
-            className='border-slate-300 px-8 py-3 text-lg font-medium transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:hover:border-slate-500 dark:hover:bg-slate-800'
-          >
-            <Link href='/register'>Get Started Free</Link>
           </Button>
         </div>
 
@@ -112,7 +106,7 @@ export default function Home() {
           href='https://adamrichardturner.dev'
           target='_blank'
           rel='noopener noreferrer'
-          className='flex items-center gap-2 text-sm text-slate-500 transition-colors duration-200 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+          className='flex items-center gap-2 text-sm text-slate-500 transition-colors duration-200 hover:text-slate-700 dark:text-white dark:hover:text-slate-200'
         >
           Made by Adam Turner
           <ExternalLink size={14} />

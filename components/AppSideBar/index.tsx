@@ -11,15 +11,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
+import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from 'next-themes';
@@ -54,12 +53,11 @@ export function AppSidebar() {
             className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
           >
             <Image
-              src={KanBanLogo}
+              src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
               alt='Kanban Board Logo'
               height={26}
               style={{ width: 'auto', height: '26px' }}
               priority
-              className='dark:invert'
             />
           </Button>
         </div>
