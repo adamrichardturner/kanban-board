@@ -7,38 +7,20 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/auth/useAuth';
-import Image from 'next/image';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-
-  if (authLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center'>
-        <Image
-          src='/spinner.svg'
-          alt='Loading...'
-          width={50}
-          height={50}
-          priority
-        />
-      </div>
-    );
-  }
+  const { isAuthenticated } = useAuth();
 
   return (
     <>
-      {isAuthenticated ? (
-        <SidebarProvider>
-          <SidebarTrigger />
-          <AppSidebar />
-          <SidebarInset className='min-h-screen w-full bg-[#F4F7FD] dark:bg-[#20212C]'>
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
-      ) : (
-        children
-      )}
+      <SidebarProvider>
+        {/* Always render sidebar shell to prevent layout shift */}
+        <SidebarTrigger />
+        <AppSidebar />
+        <SidebarInset className='min-h-screen w-full bg-[#F4F7FD] dark:bg-[#20212C]'>
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
     </>
   );
 }

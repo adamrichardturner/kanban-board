@@ -12,7 +12,6 @@ import { DroppableColumn } from '@/components/dnd/DroppableColumn';
 import type { BoardWithColumns } from '@/types';
 import { DragDropProvider } from '@/components/dnd/DragAndDropProvider';
 import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
 
 export default function ClientBoardPage({ boardId }: { boardId: string }) {
   const { data: board, isLoading, error } = useBoard(boardId);
@@ -53,16 +52,7 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
         style={{ animation: 'fadeIn 0.3s ease-in-out' }}
       >
         {showLoading ? (
-          <div className='flex h-full items-center justify-center'>
-            <Image
-              src='/spinner.svg'
-              alt='Loading...'
-              width={40}
-              height={40}
-              priority
-              className='animate-spin'
-            />
-          </div>
+          <BoardSkeleton />
         ) : (
           <ScrollArea
             className='h-full md:touch-auto'
@@ -162,21 +152,9 @@ function findTaskColumnId(
 
 function BoardSkeleton() {
   return (
-    <div className='mt-8 ml-4 animate-pulse'>
-      {/* Top bar skeleton to match layout height and shadow */}
-      <div
-        className='flex h-[90px] items-center justify-between bg-white px-6 dark:bg-[#20212C]'
-        style={{ boxShadow: '0 4px 6px 0 rgba(54, 78, 126, 0.10)' }}
-      >
-        <Skeleton className='h-6 w-40 rounded-md' />
-        <div className='flex items-center gap-4'>
-          <Skeleton className='h-10 w-28 rounded-md' />
-          <Skeleton className='h-10 w-28 rounded-md' />
-        </div>
-      </div>
-
+    <div className='animate-pulse'>
       {/* Columns wrapper matching real board spacing */}
-      <div className='flex gap-6 overflow-x-auto p-6'>
+      <div className='flex gap-4 overflow-x-auto p-6'>
         {[
           { tasks: 5, headerWidth: 'w-24' },
           { tasks: 3, headerWidth: 'w-28' },

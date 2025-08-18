@@ -2,7 +2,6 @@ import { memo, useMemo } from 'react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import Image from 'next/image';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
-import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import KanBanLogoMobile from '@/public/logo/kanban-board-logo-mobile.svg';
 import { useSidebar } from '../ui/sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,8 +19,7 @@ interface AppTopBarProps {
 
 export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
   const { open } = useSidebar();
-  const { selectedBoard, selectedBoardId, todoColumnId, isLoadingSelection } =
-    useSelectedBoard();
+  const { selectedBoard, selectedBoardId, todoColumnId } = useSelectedBoard();
   const { theme } = useTheme();
   const router = useRouter();
   const displayName = useMemo(
@@ -63,11 +61,12 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                 className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
               >
                 <Image
-                  src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
+                  src={KanBanLogo}
                   alt='Kanban Board Logo'
                   height={26}
                   style={{ width: 'auto', height: '26px' }}
                   priority
+                  className='dark:invert'
                 />
               </Button>
             </motion.div>
@@ -85,6 +84,7 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                   height={26}
                   style={{ width: 'auto', height: '26px' }}
                   priority
+                  className='dark:invert'
                 />
               </Button>
             </div>

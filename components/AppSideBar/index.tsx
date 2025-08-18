@@ -11,21 +11,23 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import KanBanLogo from '@/public/logo/kanban-board-logo.svg';
-import KanBanLogoDark from '@/public/logo/kanban-board-logo-dark.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
-import LoadingSpinner from '@/public/spinner.svg';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from 'next-themes';
 import { Button } from '../ui/button';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function AppSidebar() {
+  const { isLoading: authLoading } = useAuth();
   const { boards, isLoading } = useBoards();
   const { selectedBoardId } = useSelectedBoard();
   const { theme } = useTheme();
@@ -34,6 +36,8 @@ export function AppSidebar() {
   const handleLogoClick = () => {
     router.refresh();
   };
+
+  const loading = authLoading || isLoading;
 
   return (
     <Sidebar
@@ -50,18 +54,19 @@ export function AppSidebar() {
             className='flex items-center gap-2 hover:bg-transparent dark:hover:bg-transparent'
           >
             <Image
-              src={theme === 'dark' ? KanBanLogoDark : KanBanLogo}
+              src={KanBanLogo}
               alt='Kanban Board Logo'
               height={26}
               style={{ width: 'auto', height: '26px' }}
               priority
+              className='dark:invert'
             />
           </Button>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        {!isLoading ? (
+      <SidebarContent className='w-[300px] flex-shrink-0'>
+        {!loading ? (
           <SidebarGroup>
             <SidebarGroupLabel className='semibold pb-[20px] pl-[32px] text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
               All Boards ({boards.length})
@@ -121,22 +126,14 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ) : (
-          <div className='flex w-full items-center justify-center'>
-            <Image
-              alt='Loading'
-              src={LoadingSpinner}
-              height={20}
-              width={20}
-              priority
-            />
-          </div>
-        )}
+        ) : null}
       </SidebarContent>
 
-      <SidebarFooter className='mb-16'>
-        <ThemeToggle />
-      </SidebarFooter>
+      {isLoading ? null : (
+        <SidebarFooter className='mb-16'>
+          <ThemeToggle />
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
