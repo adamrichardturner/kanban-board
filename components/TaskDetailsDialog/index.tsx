@@ -107,7 +107,7 @@ export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
           <div className='cursor-pointer'>{/* Default trigger */}</div>
         )}
       </DialogTrigger>
-      <DialogContent className='inset:4 max-h-[90vh] max-w-[480px] overflow-y-auto rounded-lg sm:max-w-lg'>
+      <DialogContent className='inset:4 max-h-[90vh] overflow-y-auto rounded-lg'>
         <DialogHeader className='flex flex-row items-start justify-between space-y-0 pb-0'>
           <DialogTitle className='pr-8 text-[18px] leading-[23px] font-bold text-[#000112] dark:text-white'>
             {task.title}
