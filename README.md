@@ -2,7 +2,7 @@
 
 A fast, responsive Kanban board for managing boards, columns, tasks, and subtasks with smooth drag-and-drop, optimistic updates, and a polished UI.
 
-![Kanban Board](./preview.png)
+![Kanban Board](./preview.jpg)
 
 ## Tech Stack
 
