@@ -15,16 +15,13 @@ export const viewport =
   'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://kanban.adamrichardturner.dev',
-  ),
   title: 'Kanban Board | Adam Richard Turner',
   description:
     'Organize tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
   openGraph: {
     siteName: 'Kanban Board',
     type: 'website',
-    url: '/',
+    url: 'https://kanban.adamrichardturner.dev',
     title: 'Kanban Board | Adam Richard Turner',
     description:
       'Organize tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
