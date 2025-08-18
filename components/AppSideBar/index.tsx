@@ -99,6 +99,7 @@ export function AppSidebar() {
                           alt='Board Icon'
                           width={16}
                           height={16}
+                          priority
                           className={`${
                             selectedBoardId === board.id
                               ? 'brightness-0 invert'
@@ -123,6 +124,7 @@ export function AppSidebar() {
                             alt='Board Icon'
                             width={16}
                             height={16}
+                            priority
                           />
                           <span className='truncate'>+ Create New Board</span>
                         </div>
