@@ -15,10 +15,15 @@ import {
 import { useSelectedBoard } from './useSelectedBoard';
 import { toast } from 'sonner';
 
+export interface NewColumnInput {
+  name: string;
+  color?: string;
+}
+
 export interface CreateBoardWithColumnsRequest {
   name: string;
   isDefault?: boolean;
-  columns?: string[];
+  columns?: (string | NewColumnInput)[];
 }
 
 export function useBoards(options?: { autoFetch?: boolean }) {
@@ -33,27 +38,32 @@ export function useBoards(options?: { autoFetch?: boolean }) {
 
   const createColumnsForBoard = async (
     boardId: string,
-    columnNames: string[],
+    inputColumns: (string | NewColumnInput)[],
   ) => {
     // Create columns sequentially to avoid race condition with position calculation
-    for (let i = 0; i < columnNames.length; i++) {
-      const name = columnNames[i];
-      console.log(`Creating column ${i + 1}/${columnNames.length}: "${name}"`);
+    const createdColumns: ColumnResponse[] = [];
+    for (let i = 0; i < inputColumns.length; i++) {
+      const item = inputColumns[i];
+      const name = typeof item === 'string' ? item : item.name;
 
-      const lower = name.trim().toLowerCase();
-      let color: string | undefined;
-      if (lower === 'to do' || lower === 'todo') {
-        color = '#6B7280';
-      } else if (lower === 'in progress' || lower === 'doing') {
-        color = '#F59E0B';
-      } else if (lower === 'done') {
-        color = '#10B981';
+      console.log(`Creating column ${i + 1}/${inputColumns.length}: "${name}"`);
+
+      let color: string | undefined =
+        typeof item === 'string' ? undefined : item.color;
+      if (!color) {
+        const lower = name.trim().toLowerCase();
+        if (lower === 'to do' || lower === 'todo') {
+          color = '#6B7280';
+        }
+        if (lower === 'in progress' || lower === 'doing') {
+          color = '#F59E0B';
+        }
+        if (lower === 'done') {
+          color = '#10B981';
+        }
       }
 
-      const columnData: CreateColumnRequest = {
-        name,
-        color,
-      };
+      const columnData: CreateColumnRequest = { name, color };
 
       const response = await fetch(`/api/columns?boardId=${boardId}`, {
         method: 'POST',
@@ -76,11 +86,27 @@ export function useBoards(options?: { autoFetch?: boolean }) {
         );
       }
 
-      const result = await response.json();
-      console.log(`Successfully created column "${name}":`, result);
+      const result: ApiResponse<ColumnResponse> = await response.json();
+      const created = result.data!;
+      createdColumns.push(created);
+      console.log(`Successfully created column "${name}":`, created);
     }
 
     console.log('All columns created successfully for board:', boardId);
+
+    // Explicitly set positions to match the input order (smooth and deterministic)
+    try {
+      const reorderPayload: ReorderRequest = {
+        items: createdColumns.map((c, idx) => ({ id: c.id, position: idx })),
+      };
+      await fetch(`/api/columns/reorder?boardId=${boardId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reorderPayload),
+      });
+    } catch (e) {
+      console.warn('Columns reorder after creation failed (non-fatal):', e);
+    }
   };
 
   const getUserBoards = async (): Promise<BoardResponse[]> => {
@@ -153,7 +179,10 @@ export function useBoards(options?: { autoFetch?: boolean }) {
 
       // Create columns if provided
       if (columns && columns.length > 0) {
-        const filteredColumns = columns.filter((column) => column.trim());
+        const filteredColumns = columns.filter((column) => {
+          const name = typeof column === 'string' ? column : column.name;
+          return name.trim().length > 0;
+        });
         if (filteredColumns.length > 0) {
           await createColumnsForBoard(newBoard.id, filteredColumns);
         }
