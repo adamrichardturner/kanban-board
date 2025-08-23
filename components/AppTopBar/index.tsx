@@ -90,17 +90,17 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                   <div className='flex items-start gap-2'>
                     <Image
                       src={KanBanLogo}
-                      alt='Kanban Board Logo'
-                      width={26}
+                      width={153}
                       height={26}
+                      alt='Kanban Board Logo'
                       priority
                       className='block dark:hidden'
                     />
                     <Image
                       src={KanBanLogoDark}
                       alt='Kanban Board Logo'
-                      width={26}
                       height={26}
+                      width={153}
                       priority
                       className='hidden dark:md:block'
                     />
