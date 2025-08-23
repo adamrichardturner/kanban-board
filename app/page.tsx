@@ -85,7 +85,7 @@ export default function Home() {
               Multiple Boards
             </div>
             <div className='text-slate-600 dark:text-slate-300'>
-              Organize different projects with dedicated boards
+              Organise different projects with dedicated boards
             </div>
           </div>
 
