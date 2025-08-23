@@ -96,6 +96,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|_next/webpack-hmr).*)',
+    // Exclude API, Next internals, favicon, HMR, and public static asset folders
+    '/((?!api|_next/static|_next/image|favicon.ico|_next/webpack-hmr|boards|logo|og-image.png|preview.jpg).*)',
   ],
 };
