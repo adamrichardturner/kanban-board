@@ -6,12 +6,8 @@ import {
 import ClientBoardPage from './ClientBoardPage';
 
 async function fetchBoard(id: string) {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
-  const res = await fetch(`${base}/api/boards/${id}`, {
-    cache: 'no-store',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  });
+  // Use a relative URL so Next.js forwards cookies during SSR automatically
+  const res = await fetch(`/api/boards/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch board');
   const { data } = await res.json();
   return data;
