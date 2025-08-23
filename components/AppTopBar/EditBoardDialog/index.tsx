@@ -9,16 +9,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus, EllipsisVertical, Trash2, GripVertical } from 'lucide-react';
-import { Reorder, useDragControls } from 'framer-motion';
+import { Plus, EllipsisVertical } from 'lucide-react';
+import { Reorder } from 'framer-motion';
 import { useBoards } from '@/hooks/boards/useBoards';
 import { BoardWithColumns } from '@/types';
 import Image from 'next/image';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { ReorderableColumnRow as SharedReorderableColumnRow } from '@/components/ReorderableColumnRow';
 
 interface EditBoardDialogProps {
   board?: BoardWithColumns | null;
@@ -47,7 +43,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
 
   const { updateBoard, isUpdating } = useBoards();
 
-  // Don't render if no board is provided (after hooks)
   if (!board) {
     return null;
   }
@@ -68,7 +63,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   };
 
   const handleRemoveColumn = (index: number) => {
-    // Allow removing down to zero; backend will handle cascade deletes
     setColumns(columns.filter((_, i) => i !== index));
   };
 
@@ -81,7 +75,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
   const handleSubmit = () => {
     if (!boardName.trim()) return;
 
-    // Build payload with only non-empty column names; missing IDs imply deletion
     const validColumns = columns
       .filter((col) => col.name.trim())
       .map((col, index) => ({
@@ -122,7 +115,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
         onOpenChange={(newOpen) => {
           setOpen(newOpen);
           if (newOpen) {
-            // Initialize form values from current board when opening
             setBoardName(board?.name || '');
             const sortedColumns = [...(board?.columns || [])].sort(
               (a, b) => a.position - b.position,
@@ -136,7 +128,6 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
               })),
             );
           } else {
-            // Reset on close
             resetForm();
           }
         }}
@@ -174,7 +165,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                 className='space-y-2'
               >
                 {columns.map((column, index) => (
-                  <ReorderableColumnRow
+                  <SharedReorderableColumnRow
                     key={column.id ?? `new-${index}-${column.position}`}
                     column={column}
                     index={index}
@@ -185,6 +176,7 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
                       next[idx] = { ...next[idx], color };
                       setColumns(next);
                     }}
+                    placeholder='e.g. Todo'
                   />
                 ))}
               </Reorder.Group>
@@ -229,110 +221,5 @@ export function EditBoardDialog({ board, trigger }: EditBoardDialogProps) {
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-function ReorderableColumnRow({
-  column,
-  index,
-  onNameChange,
-  onRemove,
-  onColorChange,
-}: {
-  column: {
-    id?: string;
-    name: string;
-    position: number;
-    isNew?: boolean;
-    color?: string;
-  };
-  index: number;
-  onNameChange: (index: number, value: string) => void;
-  onRemove: (index: number) => void;
-  onColorChange: (index: number, color: string) => void;
-}) {
-  const controls = useDragControls();
-  return (
-    <Reorder.Item
-      value={column}
-      dragListener={false}
-      dragControls={controls}
-      className='flex items-center gap-2'
-    >
-      <button
-        type='button'
-        onPointerDown={(e) => controls.start(e)}
-        className='h-10 w-8 cursor-grab text-[#828FA3] hover:text-[#635FC7]'
-        aria-label='Drag column'
-      >
-        <GripVertical className='h-4 w-4' />
-      </button>
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type='button'
-            className='h-9 w-9 rounded-md border border-gray-200'
-            style={{ backgroundColor: column.color ?? '#635FC7' }}
-            aria-label='Pick column color'
-            title='Pick column color'
-          />
-        </PopoverTrigger>
-        <PopoverContent className='w-64' align='start'>
-          <Label className='mb-2 block text-xs text-[#828FA3]'>
-            Column color
-          </Label>
-          <div className='grid grid-cols-6 gap-2'>
-            {[
-              '#635FC7',
-              '#FF6B6B',
-              '#4ECDC4',
-              '#45B7D1',
-              '#96CEB4',
-              '#FFEAA7',
-              '#DDA0DD',
-              '#98D8C8',
-              '#F7DC6F',
-              '#BB8FCE',
-              '#85C1E9',
-              '#82E0AA',
-            ].map((c) => (
-              <button
-                key={c}
-                type='button'
-                className='h-7 w-7 rounded-md border'
-                style={{ backgroundColor: c }}
-                onClick={() => onColorChange(index, c)}
-                aria-label={`Select ${c}`}
-                title={c}
-              />
-            ))}
-          </div>
-          <div className='mt-3 flex items-center gap-2'>
-            <Label className='text-xs text-[#828FA3]'>Custom:</Label>
-            <input
-              type='color'
-              value={column.color ?? '#635FC7'}
-              onChange={(e) => onColorChange(index, e.target.value)}
-              className='h-8 w-10 cursor-pointer rounded border border-gray-200 p-0'
-            />
-          </div>
-        </PopoverContent>
-      </Popover>
-      <Input
-        placeholder='e.g. Todo'
-        value={column.name}
-        onChange={(e) => onNameChange(index, e.target.value)}
-        className='flex-1'
-      />
-      <Button
-        type='button'
-        variant='ghost'
-        size='sm'
-        onClick={() => onRemove(index)}
-        className='h-10 w-10 p-0 hover:bg-gray-100'
-      >
-        <X className='h-4 w-4' />
-      </Button>
-    </Reorder.Item>
   );
 }

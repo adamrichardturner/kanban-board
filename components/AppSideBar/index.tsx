@@ -23,7 +23,6 @@ import type { BoardWithColumns } from '@/types/entities';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 import { ThemeToggle } from '../theme-toggle';
-import { useTheme } from 'next-themes';
 import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/useAuth';
 
@@ -31,7 +30,6 @@ export function AppSidebar() {
   const { isLoading: authLoading } = useAuth();
   const { boards, isLoading } = useBoards({ autoFetch: false });
   const { selectedBoardId, selectedBoard } = useSelectedBoard();
-  const { theme } = useTheme();
   const router = useRouter();
 
   const handleLogoClick = () => {

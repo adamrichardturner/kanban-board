@@ -26,14 +26,11 @@ export function CreateColumnDialog({ trigger }: CreateColumnDialogProps) {
   const { selectedBoard, selectedBoardId } = useSelectedBoard();
   const { createColumn, isCreatingColumn } = useBoards();
 
-  // Reset handled explicitly on dialog close in onOpenChange
-
   const handleSubmit = () => {
     if (!columnName.trim() || !selectedBoardId) {
       return;
     }
 
-    // Check if board already has 6 columns (max limit)
     if (selectedBoard?.columns && selectedBoard.columns.length >= 6) {
       return;
     }
@@ -44,7 +41,6 @@ export function CreateColumnDialog({ trigger }: CreateColumnDialogProps) {
       color: selectedColor,
     });
 
-    // Reset form and close dialog
     setColumnName('');
     setSelectedColor('#635FC7');
     setOpen(false);

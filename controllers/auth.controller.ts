@@ -114,17 +114,17 @@ export class AuthController {
 
   private getErrorStatusCode(errorMessage: string): number {
     if (errorMessage.includes('not found')) {
-      return HTTP_STATUS.NOT_FOUND; // 404
+      return HTTP_STATUS.NOT_FOUND;
     }
     if (errorMessage.includes('deactivated')) {
-      return HTTP_STATUS.FORBIDDEN; // 403
+      return HTTP_STATUS.FORBIDDEN;
     }
     if (errorMessage.includes('Invalid')) {
-      return HTTP_STATUS.BAD_REQUEST; // 400
+      return HTTP_STATUS.BAD_REQUEST;
     }
     if (errorMessage.includes('token')) {
-      return HTTP_STATUS.UNAUTHORIZED; // 401
+      return HTTP_STATUS.UNAUTHORIZED;
     }
-    return HTTP_STATUS.INTERNAL_SERVER_ERROR; // 500
+    return HTTP_STATUS.INTERNAL_SERVER_ERROR;
   }
 }
