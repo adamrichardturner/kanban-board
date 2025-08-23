@@ -40,7 +40,7 @@ export function TaskDetailsDialog({ task, trigger }: TaskDetailsDialogProps) {
 
   const { selectedBoard } = useSelectedBoard();
   const { updateTaskAsync, updateSubtaskAsync, useTaskQuery } = useTasks();
-  const { data: freshTask } = useTaskQuery(task.id);
+  const { data: freshTask } = useTaskQuery(task.id, open);
 
   // Sync when dialog opens or when fresh task data arrives
   useEffect(() => {

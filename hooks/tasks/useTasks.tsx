@@ -57,11 +57,11 @@ export function useTasks() {
     });
   };
 
-  const useTaskQuery = (taskId: string) => {
+  const useTaskQuery = (taskId: string, enabled: boolean = true) => {
     return useQuery<TaskWithSubtasks, Error>({
       queryKey: ['tasks', taskId],
       queryFn: () => getTask(taskId),
-      enabled: !!taskId,
+      enabled: Boolean(taskId) && enabled,
       staleTime: 1000 * 15,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
