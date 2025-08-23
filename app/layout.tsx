@@ -61,6 +61,7 @@ export default function RootLayout({
       <head>
         <link rel='preload' as='image' href='/boards/board-icon-regular.svg' />
         <link rel='preload' as='image' href='/boards/board-icon-create.svg' />
+        <link rel='preload' as='image' href='/boards/board-icon-active.svg' />
       </head>
       <body className={`${plusJakartaSans.className}`}>
         <Script id='theme-init' strategy='beforeInteractive'>

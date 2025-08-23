@@ -72,16 +72,16 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                     <Image
                       src={KanBanLogoMobile}
                       alt='Kanban Board Logo'
+                      width={26}
                       height={26}
-                      style={{ width: 'auto', height: '26px' }}
                       priority
                       className='block dark:hidden'
                     />
                     <Image
                       src={KanBanLogoDark}
                       alt='Kanban Board Logo'
+                      width={26}
                       height={26}
-                      style={{ width: 'auto', height: '26px' }}
                       priority
                       className='hidden dark:md:block'
                     />
@@ -91,16 +91,16 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                     <Image
                       src={KanBanLogo}
                       alt='Kanban Board Logo'
+                      width={26}
                       height={26}
-                      style={{ width: 'auto', height: '26px' }}
                       priority
                       className='block dark:hidden'
                     />
                     <Image
                       src={KanBanLogoDark}
                       alt='Kanban Board Logo'
+                      width={26}
                       height={26}
-                      style={{ width: 'auto', height: '26px' }}
                       priority
                       className='hidden dark:md:block'
                     />
@@ -119,8 +119,8 @@ export const AppTopBar = memo(function AppTopBar({ name }: AppTopBarProps) {
                 <Image
                   src={KanBanLogoMobile}
                   alt='Kanban Board Logo'
+                  width={26}
                   height={26}
-                  style={{ width: 'auto', height: '26px' }}
                   priority
                 />
               </Button>

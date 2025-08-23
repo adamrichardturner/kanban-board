@@ -80,12 +80,16 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                     }
                   >
                     <Image
-                      src='/boards/board-icon-regular.svg'
+                      src={
+                        isActive
+                          ? '/boards/board-icon-active.svg'
+                          : '/boards/board-icon-regular.svg'
+                      }
                       alt='Board icon'
                       width={16}
                       height={16}
-                      className={isActive ? 'brightness-0 invert' : ''}
                       priority
+                      unoptimized
                     />
                     <span className='truncate'>{board.name}</span>
                   </Link>
@@ -112,6 +116,7 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
                   width={16}
                   height={16}
                   priority
+                  unoptimized
                 />
                 <span className='truncate'>+ Create New Board</span>
               </button>

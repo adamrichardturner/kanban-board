@@ -97,18 +97,22 @@ export function AppSidebar() {
                         href={`/boards/${board.id}`}
                         className='flex w-full items-center gap-4 focus:text-inherit active:text-inherit'
                       >
-                        <Image
-                          src='/boards/board-icon-regular.svg'
-                          alt='Board Icon'
-                          width={16}
-                          height={16}
-                          priority
-                          className={`${
-                            selectedBoardId === board.id
-                              ? 'brightness-0 invert'
-                              : ''
-                          }`}
-                        />
+                        {(() => {
+                          const isActive = selectedBoardId === board.id;
+                          const iconSrc = isActive
+                            ? '/boards/board-icon-active.svg'
+                            : '/boards/board-icon-regular.svg';
+                          return (
+                            <Image
+                              src={iconSrc}
+                              alt='Board Icon'
+                              width={16}
+                              height={16}
+                              priority
+                              unoptimized
+                            />
+                          );
+                        })()}
                         <span className='truncate'>{board.name}</span>
                       </Link>
                     </SidebarMenuButton>
