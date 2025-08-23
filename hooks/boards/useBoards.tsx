@@ -21,7 +21,7 @@ export interface CreateBoardWithColumnsRequest {
   columns?: string[];
 }
 
-export function useBoards() {
+export function useBoards(options?: { autoFetch?: boolean }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const {
@@ -35,13 +35,6 @@ export function useBoards() {
     boardId: string,
     columnNames: string[],
   ) => {
-    console.log(
-      'Creating columns sequentially for board:',
-      boardId,
-      'columns:',
-      columnNames,
-    );
-
     // Create columns sequentially to avoid race condition with position calculation
     for (let i = 0; i < columnNames.length; i++) {
       const name = columnNames[i];
@@ -115,6 +108,7 @@ export function useBoards() {
     staleTime: 1000 * 60 * 2,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    enabled: options?.autoFetch !== false,
   });
 
   const useBoardQuery = (boardId: string) => {
@@ -510,6 +504,8 @@ export function useBoards() {
     isCreatingColumn: createColumnMutation.isPending,
 
     refetch: () => queryClient.invalidateQueries({ queryKey: ['boards'] }),
+    loadBoards: () =>
+      queryClient.fetchQuery({ queryKey: ['boards'], queryFn: getUserBoards }),
   };
 }
 

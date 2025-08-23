@@ -14,6 +14,8 @@ import { useBoards } from '@/hooks/boards/useBoards';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { Plus, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import type { BoardResponse } from '@/types';
+import type { BoardWithColumns } from '@/types/entities';
 
 type TriggerRender = (args: {
   open: boolean;
@@ -25,13 +27,17 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ trigger }: MobileMenuProps) {
-  const { boards } = useBoards();
-  const { selectedBoardId } = useSelectedBoard();
+  const { boards } = useBoards({ autoFetch: false });
+  const { selectedBoardId, selectedBoard } = useSelectedBoard();
   const [open, setOpen] = useState(false);
 
+  const listForMenu = useMemo<BoardResponse[]>(() => {
+    return getDisplayBoardsForMenu(boards, selectedBoard || undefined);
+  }, [boards, selectedBoard]);
+
   const sortedBoards = useMemo(() => {
-    return [...boards].sort((a, b) => a.position - b.position);
-  }, [boards]);
+    return [...listForMenu].sort((a, b) => a.position - b.position);
+  }, [listForMenu]);
 
   const triggerElement =
     typeof trigger === 'function'
@@ -136,3 +142,26 @@ export function MobileMenu({ trigger }: MobileMenuProps) {
 }
 
 export default MobileMenu;
+
+function getDisplayBoardsForMenu(
+  boards: BoardResponse[],
+  selectedBoard: BoardWithColumns | undefined,
+): BoardResponse[] {
+  if (boards.length > 0) {
+    return boards;
+  }
+  if (!selectedBoard) {
+    return [];
+  }
+  return [
+    {
+      id: selectedBoard.id,
+      userId: selectedBoard.user_id,
+      name: selectedBoard.name,
+      isDefault: selectedBoard.is_default,
+      position: selectedBoard.position,
+      createdAt: selectedBoard.created_at,
+      updatedAt: selectedBoard.updated_at,
+    },
+  ];
+}

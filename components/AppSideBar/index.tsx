@@ -18,6 +18,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useBoards } from '@/hooks/boards/useBoards';
+import type { BoardResponse } from '@/types';
+import type { BoardWithColumns } from '@/types/entities';
 import { useSelectedBoard } from '@/hooks/boards/useSelectedBoard';
 import { CreateNewBoardDialog } from './CreateNewBoardDialog';
 import { ThemeToggle } from '../theme-toggle';
@@ -27,8 +29,8 @@ import { useAuth } from '@/hooks/auth/useAuth';
 
 export function AppSidebar() {
   const { isLoading: authLoading } = useAuth();
-  const { boards, isLoading } = useBoards();
-  const { selectedBoardId } = useSelectedBoard();
+  const { boards, isLoading } = useBoards({ autoFetch: false });
+  const { selectedBoardId, selectedBoard } = useSelectedBoard();
   const { theme } = useTheme();
   const router = useRouter();
 
@@ -37,6 +39,7 @@ export function AppSidebar() {
   };
 
   const loading = authLoading || isLoading;
+  const displayBoards = getDisplayBoards(boards, selectedBoard || undefined);
 
   return (
     <Sidebar
@@ -76,11 +79,11 @@ export function AppSidebar() {
         {!loading ? (
           <SidebarGroup>
             <SidebarGroupLabel className='semibold py-[42px] pl-[32px] text-[12px] tracking-[2.4px] text-[#828FA3] uppercase'>
-              All Boards ({boards.length})
+              All Boards ({displayBoards.length})
             </SidebarGroupLabel>
             <SidebarGroupContent className='pt-[0px]'>
               <SidebarMenu>
-                {boards.map((board) => (
+                {displayBoards.map((board) => (
                   <SidebarMenuItem key={board.id}>
                     <SidebarMenuButton
                       asChild
@@ -145,4 +148,27 @@ export function AppSidebar() {
       )}
     </Sidebar>
   );
+}
+
+function getDisplayBoards(
+  boards: BoardResponse[],
+  selectedBoard: BoardWithColumns | undefined,
+): BoardResponse[] {
+  if (boards.length > 0) {
+    return boards;
+  }
+  if (!selectedBoard) {
+    return [];
+  }
+  return [
+    {
+      id: selectedBoard.id,
+      userId: selectedBoard.user_id,
+      name: selectedBoard.name,
+      isDefault: selectedBoard.is_default,
+      position: selectedBoard.position,
+      createdAt: selectedBoard.created_at,
+      updatedAt: selectedBoard.updated_at,
+    },
+  ];
 }
