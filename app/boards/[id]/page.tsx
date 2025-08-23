@@ -5,14 +5,6 @@ import {
 } from '@tanstack/react-query';
 import ClientBoardPage from './ClientBoardPage';
 
-async function fetchBoard(id: string) {
-  // Use a relative URL so Next.js forwards cookies during SSR automatically
-  const res = await fetch(`/api/boards/${id}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch board');
-  const { data } = await res.json();
-  return data;
-}
-
 export default async function Page({
   params,
 }: {
@@ -30,4 +22,13 @@ export default async function Page({
       <ClientBoardPage boardId={id} />
     </HydrationBoundary>
   );
+}
+
+async function fetchBoard(id: string) {
+  const res = await fetch(`/api/boards/${id}`, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Failed to fetch board');
+  }
+  const { data } = await res.json();
+  return data;
 }

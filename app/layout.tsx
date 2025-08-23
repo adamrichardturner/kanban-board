@@ -17,14 +17,14 @@ export const viewport =
 export const metadata: Metadata = {
   title: 'Kanban Board | Adam Richard Turner',
   description:
-    'Organize tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
+    'Organise tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
   openGraph: {
     siteName: 'Kanban Board',
     type: 'website',
     url: 'https://kanban.adamrichardturner.dev',
     title: 'Kanban Board | Adam Richard Turner',
     description:
-      'Organize tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
+      'Organise tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
     images: [
       {
         url: 'https://kanban.adamrichardturner.dev/og-image.png',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     site: '@devadam88',
     title: 'Kanban Board | Adam Richard Turner',
     description:
-      'Organize tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
+      'Organise tasks, track progress, and boost productivity with our intuitive Kanban board application. Drag-and-drop functionality with real-time updates.',
     images: [
       {
         url: 'https://kanban.adamrichardturner.dev/og-image.png',

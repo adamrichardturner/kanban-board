@@ -9,9 +9,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useBoards } from '@/hooks/boards/useBoards';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface CreateNewBoardDialogProps {
   trigger?: React.ReactNode;
@@ -47,9 +48,8 @@ export function CreateNewBoardDialog({ trigger }: CreateNewBoardDialogProps) {
       return;
     }
 
-    // Check if user has reached the maximum number of boards (8)
     if (boards && boards.length >= 8) {
-      // Could add a toast notification here if needed
+      toast.error('Maximum boards reached (8)');
       return;
     }
 

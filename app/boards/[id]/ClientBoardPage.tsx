@@ -14,7 +14,7 @@ import { DragDropProvider } from '@/components/dnd/DragAndDropProvider';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ClientBoardPage({ boardId }: { boardId: string }) {
-  const { data: board, isLoading, error } = useBoard(boardId);
+  const { data: board, isLoading } = useBoard(boardId);
   const { open: sidebarOpen, isMobile } = useSidebar();
   const { theme } = useTheme();
 
@@ -32,16 +32,6 @@ export default function ClientBoardPage({ boardId }: { boardId: string }) {
   const dnd = useTaskDnd(safeBoard);
 
   const scrollAreaWidth = getScrollAreaWidth(isMobile, sidebarOpen);
-  function getScrollAreaWidth(isMobile: boolean, sidebarOpen: boolean) {
-    if (isMobile) {
-      return 'calc(100vw)';
-    }
-    if (sidebarOpen) {
-      return 'calc(100vw - 300px - 3rem)';
-    }
-    return 'calc(100vw - 3rem)';
-  }
-
   const showLoading = isLoading || !board;
 
   return (
@@ -191,4 +181,15 @@ function BoardSkeleton() {
       </div>
     </div>
   );
+}
+
+// Utilities
+function getScrollAreaWidth(isMobile: boolean, sidebarOpen: boolean) {
+  if (isMobile) {
+    return 'calc(100vw)';
+  }
+  if (sidebarOpen) {
+    return 'calc(100vw - 300px - 3rem)';
+  }
+  return 'calc(100vw - 3rem)';
 }
