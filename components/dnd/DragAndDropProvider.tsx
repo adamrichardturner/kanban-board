@@ -6,7 +6,6 @@ import {
   DragOverlay,
   closestCorners,
   PointerSensor,
-  KeyboardSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
@@ -32,7 +31,6 @@ export function DragDropProvider({
 }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor),
   );
 
   return (
